@@ -1,0 +1,127 @@
+<!--
+  vi:ts=2:sw=2:expandtab
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <!-- Define Parent -->
+  <parent>
+    <groupId>org.jboss.ejb3.async</groupId>
+    <artifactId>async-build</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../build/pom.xml</relativePath>
+  </parent>
+
+  <!-- Maven POM Model Version -->
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- Artifact Information -->
+  <artifactId>async-impl</artifactId>
+  <packaging>jar</packaging>
+  <name>JBoss EJB 3.1+ @Asynchronous Implementation (Internals)</name>
+  <description>Implementation Support for EJB 3.1+ @Asynchronous</description>
+
+  <!-- Build Configuration -->
+  <build>
+  
+  </build>
+  
+  <properties>
+  
+    <!-- Versioning -->
+    <version.org.jboss.aop_jboss-aop>2.1.1.GA</version.org.jboss.aop_jboss-aop>
+    <version.org.jboss.aspects_jboss.aspects.common>1.0.0.Beta1</version.org.jboss.aspects_jboss.aspects.common>
+    <version.org.jboss.aspects_jboss.remoting.aspects>1.0.2</version.org.jboss.aspects_jboss.remoting.aspects>
+    <version.org.jboss.javaee_jboss.ejb.api_3.1>1.0-alpha-1</version.org.jboss.javaee_jboss.ejb.api_3.1>
+    <version.org.jboss.ejb3_jboss.ejb3.interceptors>1.0.0</version.org.jboss.ejb3_jboss.ejb3.interceptors>
+    <version.org.jboss.security_jboss.security>2.0.2.SP6</version.org.jboss.security_jboss.security>
+    <version.org.jboss.javaee_jboss.jacc.api>1.1.0.GA</version.org.jboss.javaee_jboss.jacc.api>
+  
+  </properties>
+
+  <dependencies>
+  
+    <!-- 
+    Dependencies: org.jboss.ejb3 
+    -->
+    
+    <!-- org.jboss.ejb3.async:async-spi -->
+    <dependency>
+      <groupId>org.jboss.ejb3.async</groupId>
+      <artifactId>async-spi</artifactId>
+      <version>${version}</version>
+    </dependency>
+    
+    <!-- org.jboss.javaee:jboss-ejb-api_3.1 -->
+    <dependency>
+      <groupId>org.jboss.javaee</groupId>
+      <artifactId>jboss-ejb-api_3.1</artifactId>
+      <version>${version.org.jboss.javaee_jboss.ejb.api_3.1}</version>
+    </dependency>
+    
+    <!-- org.jboss.ejb3:jboss-ejb3-interceptors -->
+    <dependency>
+      <groupId>org.jboss.ejb3</groupId>
+      <artifactId>jboss-ejb3-interceptors</artifactId>
+      <version>${version.org.jboss.ejb3_jboss.ejb3.interceptors}</version>
+    </dependency>
+    
+    <!-- 
+    Dependencies: External to EJB3 
+    -->
+
+    <!-- junit:junit -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  
+    <!-- org.jboss.aop:jboss-aop -->
+    <dependency>
+      <groupId>org.jboss.aop</groupId>
+      <artifactId>jboss-aop</artifactId>
+      <version>${version.org.jboss.aop_jboss-aop}</version>
+    </dependency>
+    
+    <!-- org.jboss.aspects:jboss-remoting-aspects -->
+    <dependency>
+      <groupId>org.jboss.aspects</groupId>
+      <artifactId>jboss-remoting-aspects</artifactId>
+      <version>${version.org.jboss.aspects_jboss.remoting.aspects}</version>
+    </dependency>
+    
+    <!-- org.jboss.aspects:jboss-aspects-common -->
+    <dependency>
+      <groupId>org.jboss.aspects</groupId>
+      <artifactId>jboss-aspects-common</artifactId>
+      <version>${version.org.jboss.aspects_jboss.aspects.common}</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <!-- org.jboss.security:jboss-security-spi -->
+    <dependency>
+      <groupId>org.jboss.security</groupId>
+      <artifactId>jboss-security-spi</artifactId>
+      <version>${version.org.jboss.security_jboss.security}</version>
+    </dependency>
+    
+    <!-- org.jboss.security:jbosssx-client -->
+    <dependency>
+      <groupId>org.jboss.security</groupId>
+      <artifactId>jbosssx-client</artifactId>
+      <version>${version.org.jboss.security_jboss.security}</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <!-- org.jboss.javaee:jboss-jacc-api -->
+    <dependency>
+      <groupId>org.jboss.javaee</groupId>
+      <artifactId>jboss-jacc-api</artifactId>
+      <version>${version.org.jboss.javaee_jboss.jacc.api}</version>
+      <scope>test</scope>
+    </dependency>
+    
+  </dependencies>
+</project>

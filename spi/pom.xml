@@ -1,0 +1,50 @@
+<!--
+  vi:ts=2:sw=2:expandtab
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <!-- Define Parent -->
+  <parent>
+    <groupId>org.jboss.ejb3.async</groupId>
+    <artifactId>async-build</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../build/pom.xml</relativePath>
+  </parent>
+
+  <!-- Maven POM Model Version -->
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- Artifact Information -->
+  <artifactId>async-spi</artifactId>
+  <packaging>jar</packaging>
+  <name>JBoss EJB 3.1+ @Asynchronous SPI</name>
+  <description>Service Provider Interface for JBoss EJB 3.1+ @Asynchronous</description>
+
+  <!-- Build Configuration -->
+  <build>
+  
+    
+  </build>
+  
+  <properties>
+  
+    <!-- Versioning -->
+
+  
+  </properties>
+
+  <dependencies>
+  
+    <!-- 
+    Dependencies: org.jboss.ejb3 
+    -->
+    
+    
+    <!-- 
+    Dependencies: External to EJB3 
+    -->
+    
+  </dependencies>
+</project>
