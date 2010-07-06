@@ -8,7 +8,7 @@
   <bean name="org.jboss.ejb3.AsyncExecutorServiceDeployer"
     class="org.jboss.ejb3.async.deployer.AsyncExecutorServiceDeployer">
     <constructor>
-      <parameter name="asyncExecutorService"><inject name="org.jboss.ejb3.async.ExecutorService"/></parameter>
+      <parameter><inject bean="org.jboss.ejb3.async.ExecutorService"/></parameter>
     </constructor>
   </bean>
   
@@ -42,7 +42,7 @@
   -->
   <bean name="org.jboss.ejb3.async.ExecutorService" class="org.jboss.threads.JBossScheduledThreadPoolExecutor">
     <constructor>
-      <parameter>1</parameter>
+      <parameter>10</parameter>
     </constructor>
   </bean> 
   

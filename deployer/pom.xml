@@ -33,7 +33,7 @@
     <version.org.jboss.shrinkwrap>1.0.0-alpha-10</version.org.jboss.shrinkwrap>
     <version.org.jboss.arquillian>1.0.0.Alpha2</version.org.jboss.arquillian>
     <version.org.jboss.deployers.jboss_deployers_spi>2.2.0.Alpha4</version.org.jboss.deployers.jboss_deployers_spi>
-    <version.org.jboss.kernel>2.2.0.Alpha2</version.org.jboss.kernel>
+    <version.org.jboss.kernel>2.2.0.Alpha10</version.org.jboss.kernel>
     <version.org.jboss.metadata_jboss.metadata>1.0.4</version.org.jboss.metadata_jboss.metadata>
     <version.org.jboss.bootstrap>2.1.0-alpha-5</version.org.jboss.bootstrap>
     <version.org.jboss.reloaded>0.1.2</version.org.jboss.reloaded>
