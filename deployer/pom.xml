@@ -1,0 +1,160 @@
+<!--
+  vi:ts=2:sw=2:expandtab
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <!-- Define Parent -->
+  <parent>
+    <groupId>org.jboss.ejb3.async</groupId>
+    <artifactId>jboss-ejb3-async-build</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../build/pom.xml</relativePath>
+  </parent>
+
+  <!-- Maven POM Model Version -->
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- Artifact Information -->
+  <artifactId>jboss-ejb3-async-deployer</artifactId>
+  <packaging>jar</packaging>
+  <name>JBoss EJB 3.1+ @Asynchronous Deployer</name>
+  <description>Microcontainer Integration Deployer Support for EJB 3.1+ @Asynchronous</description>
+
+  <!-- Build Configuration -->
+  <build>
+  
+  </build>
+  
+  <properties>
+  
+    <!-- Versioning -->
+    <version.org.jboss.shrinkwrap>1.0.0-alpha-10</version.org.jboss.shrinkwrap>
+    <version.org.jboss.arquillian>1.0.0.Alpha2</version.org.jboss.arquillian>
+    <version.org.jboss.deployers.jboss_deployers_spi>2.2.0.Alpha4</version.org.jboss.deployers.jboss_deployers_spi>
+    <version.org.jboss.kernel>2.2.0.Alpha2</version.org.jboss.kernel>
+    <version.org.jboss.metadata_jboss.metadata>1.0.4</version.org.jboss.metadata_jboss.metadata>
+    <version.org.jboss.bootstrap>2.1.0-alpha-5</version.org.jboss.bootstrap>
+    <version.org.jboss.reloaded>0.1.2</version.org.jboss.reloaded>
+    <version.org.jboss.threads>2.0.0.CR4</version.org.jboss.threads>
+  
+  </properties>
+
+  <dependencies>
+  
+    <!-- 
+    Dependencies: org.jboss.ejb3 
+    -->
+    
+    <!-- org.jboss.ejb3.async:async-spi -->
+    <dependency>
+      <groupId>org.jboss.ejb3.async</groupId>
+      <artifactId>jboss-ejb3-async-spi</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    
+    <!-- 
+    Dependencies: External to EJB3 
+    -->
+    <dependency>
+      <groupId>org.jboss.kernel</groupId>
+      <artifactId>jboss-kernel</artifactId>
+      <version>${version.org.jboss.kernel}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.deployers</groupId>
+      <artifactId>jboss-deployers-spi</artifactId>
+      <version>${version.org.jboss.deployers.jboss_deployers_spi}</version>
+      <scope>provided</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.jboss.bootstrap</groupId>
+      <artifactId>jboss-bootstrap-impl-mc</artifactId>
+      <version>${version.org.jboss.bootstrap}</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.jboss.reloaded</groupId>
+      <artifactId>jboss-reloaded-vdf-bootstrap-minimal</artifactId>
+      <version>${version.org.jboss.reloaded}</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.jboss.metadata</groupId>
+      <artifactId>jboss-metadata</artifactId>
+      <version>${version.org.jboss.metadata_jboss.metadata}</version>
+      <scope>provided</scope>
+      <!-- Correct versions should come in through Reloaded or Deployers -->
+      <exclusions>
+        <exclusion>
+          <groupId>org.jboss</groupId>
+          <artifactId>jboss-vfs</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss</groupId>
+          <artifactId>jboss-mdr</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.jboss.threads</groupId>
+      <artifactId>jboss-threads</artifactId>
+      <version>${version.org.jboss.threads}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.threads</groupId>
+      <artifactId>jboss-threads-metadata</artifactId>
+      <version>${version.org.jboss.threads}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- junit:junit -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    
+    <!-- Arquillian -->
+    <dependency>
+      <groupId>org.jboss.arquillian</groupId>
+      <artifactId>arquillian-junit</artifactId>
+      <version>${version.org.jboss.arquillian}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.arquillian.container</groupId>
+      <artifactId>arquillian-reloaded</artifactId>
+      <version>${version.org.jboss.arquillian}</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <!-- ShrinkWrap -->
+    <dependency>
+      <groupId>org.jboss.shrinkwrap</groupId>
+      <artifactId>shrinkwrap-api</artifactId>
+      <version>${version.org.jboss.shrinkwrap}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.shrinkwrap</groupId>
+      <artifactId>shrinkwrap-impl-base</artifactId>
+      <version>${version.org.jboss.shrinkwrap}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.shrinkwrap</groupId>
+      <artifactId>shrinkwrap-extension-vfs3</artifactId>
+      <version>${version.org.jboss.shrinkwrap}</version>
+      <scope>test</scope>
+    </dependency>
+  
+  </dependencies>
+</project>

@@ -90,7 +90,7 @@ public class RemotableFutureInterceptor implements Interceptor
       if (this.isRemoteInvocation(invocation))
       {
          // If the return value is a Future
-         if (returnValue instanceof Future)
+         if (returnValue instanceof Future<?>)
          {
             // Cast
             final Future<?> futureReturnValue = (Future<?>) returnValue;

@@ -45,6 +45,7 @@
   <modules>
     <module>spi</module>
     <module>build</module>
+    <module>deployer</module>
     <module>impl</module>
   </modules>
 

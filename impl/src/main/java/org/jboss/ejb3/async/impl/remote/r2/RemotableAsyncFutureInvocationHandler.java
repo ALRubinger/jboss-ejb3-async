@@ -79,7 +79,7 @@ public class RemotableAsyncFutureInvocationHandler extends PojiProxy
     * @return
     * @throws NotBoundException If the specified invokerName is not bound in MC
     */
-   private static InvokerLocator getClientBinding(String invokerName) throws NotBoundException
+   private static InvokerLocator getClientBinding(final String invokerName) throws NotBoundException
    {
       // Initialize
       String url = null;
