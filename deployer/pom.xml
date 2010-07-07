@@ -47,10 +47,10 @@
     Dependencies: org.jboss.ejb3 
     -->
     
-    <!-- org.jboss.ejb3.async:async-spi -->
+    <!-- org.jboss.ejb3.async:async-impl -->
     <dependency>
       <groupId>org.jboss.ejb3.async</groupId>
-      <artifactId>jboss-ejb3-async-spi</artifactId>
+      <artifactId>jboss-ejb3-async-impl</artifactId>
       <version>${project.version}</version>
     </dependency>
     

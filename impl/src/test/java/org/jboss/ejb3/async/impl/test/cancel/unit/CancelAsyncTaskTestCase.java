@@ -22,7 +22,6 @@
 package org.jboss.ejb3.async.impl.test.cancel.unit;
 
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import junit.framework.TestCase;
 
@@ -64,7 +63,7 @@ public class CancelAsyncTaskTestCase
    public static void beforeClass() throws Throwable
    {
       aopDeployer.deploy();
-      container = new PausableProcessingAsyncContainer<Pojo>("Test Pausable Async POJO Container",
+      container = PausableProcessingAsyncContainer.create("Test Pausable Async POJO Container",
             TestConstants.DOMAIN_ASYNC, Pojo.class);
    }
 
@@ -95,8 +94,7 @@ public class CancelAsyncTaskTestCase
       final BeanContext<Pojo> bean = container.construct();
 
       // Set the container to allow processing
-      final ThreadPoolExecutor executor = (ThreadPoolExecutor) container.getAsynchronousExecutor();
-      final PausableBlockingQueue<?> queue = (PausableBlockingQueue<?>) executor.getQueue();
+      final PausableBlockingQueue<?> queue = (PausableBlockingQueue<?>) container.getQueue();
       queue.resume();
       log.info("Work queue is active");
 

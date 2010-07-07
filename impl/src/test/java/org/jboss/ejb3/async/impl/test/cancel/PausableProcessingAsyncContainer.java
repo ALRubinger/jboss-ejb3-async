@@ -21,10 +21,11 @@
  */
 package org.jboss.ejb3.async.impl.test.cancel;
 
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.jboss.ejb3.async.impl.test.common.ThreadPoolAsyncContainer;
-import org.jboss.ejb3.async.impl.util.concurrent.ResultUnwrappingThreadPoolExecutor;
+import org.jboss.ejb3.async.impl.util.concurrent.ResultUnwrappingExecutorService;
 import org.jboss.ejb3.async.spi.container.AsyncInvocationProcessor;
 
 /**
@@ -41,14 +42,51 @@ public class PausableProcessingAsyncContainer<T> extends ThreadPoolAsyncContaine
 {
 
    // --------------------------------------------------------------------------------||
-   // Constructors -------------------------------------------------------------------||
+   // Instance Members ---------------------------------------------------------------||
    // --------------------------------------------------------------------------------||
 
-   public PausableProcessingAsyncContainer(final String name, final String domainName,
-         final Class<? extends T> beanClass)
+   /**
+    * Underlying pausable queue
+    */
+   private PausableBlockingQueue<Runnable> queue;
+
+   // --------------------------------------------------------------------------------||
+   // Constructor --------------------------------------------------------------------||
+   // --------------------------------------------------------------------------------||
+
+   /**
+    * Internal ctor
+    */
+   private PausableProcessingAsyncContainer(final String name, final String domainName,
+         final Class<? extends T> beanClass, PausableBlockingQueue<Runnable> queue)
    {
-      super(name, domainName, beanClass, new ResultUnwrappingThreadPoolExecutor(3, 6, 3, TimeUnit.SECONDS,
-            new PausableBlockingQueue<Runnable>(false)));
+      super(name, domainName, beanClass, new ResultUnwrappingExecutorService(new ThreadPoolExecutor(3, 6, 3,
+            TimeUnit.SECONDS, queue)));
+      this.queue = queue;
+   }
+
+   /**
+    * Factory create method
+    * @param <T>
+    * @param name
+    * @param domainName
+    * @param beanClass
+    * @return
+    */
+   public static <T> PausableProcessingAsyncContainer<T> create(final String name, final String domainName,
+         final Class<T> beanClass)
+   {
+      final PausableBlockingQueue<Runnable> queue = new PausableBlockingQueue<Runnable>(false);
+      return new PausableProcessingAsyncContainer<T>(name, domainName, beanClass, queue);
+   }
+
+   /**
+    * Obtains the queue (blockable) behind the container
+    * @return
+    */
+   public PausableBlockingQueue<Runnable> getQueue()
+   {
+      return queue;
    }
 
 }

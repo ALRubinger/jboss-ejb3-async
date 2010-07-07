@@ -40,11 +40,16 @@
     format above
     TODO Remove this when the above works
   -->
-  <bean name="org.jboss.ejb3.async.ExecutorService" class="org.jboss.threads.JBossScheduledThreadPoolExecutor">
+  <bean name="org.jboss.ejb3.async.BackingExecutorService" class="org.jboss.threads.JBossScheduledThreadPoolExecutor">
     <constructor>
       <parameter>10</parameter>
     </constructor>
   </bean> 
   
+  <bean name="org.jboss.ejb3.async.ExecutorService" class="org.jboss.ejb3.async.impl.util.concurrent.ResultUnwrappingExecutorService">
+    <constructor>
+      <parameter><inject bean="org.jboss.ejb3.async.BackingExecutorService"/></parameter>
+    </constructor>
+  </bean> 
 
 </deployment>

@@ -31,8 +31,6 @@ import java.util.concurrent.TimeoutException;
 import org.jboss.logging.Logger;
 
 /**
- * ResultUnwrappingFuture
- * 
  * Client view of an EJB 3.1 Asynchronous invocation's return
  * value 
  * 
@@ -76,8 +74,8 @@ public class ResultUnwrappingFuture<V> extends FutureTask<V> implements Future<V
    // Required Implementations -------------------------------------------------------||
    // --------------------------------------------------------------------------------||
 
-   /*
-    * (non-Javadoc)
+   /**
+    * {@inheritDoc}
     * @see java.util.concurrent.Future#get()
     */
    public V get() throws InterruptedException, ExecutionException
@@ -96,8 +94,8 @@ public class ResultUnwrappingFuture<V> extends FutureTask<V> implements Future<V
       return wrappedValue;
    }
 
-   /*
-    * (non-Javadoc)
+   /**
+    * {@inheritDoc}
     * @see java.util.concurrent.Future#get(long, java.util.concurrent.TimeUnit)
     */
    public V get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException,
