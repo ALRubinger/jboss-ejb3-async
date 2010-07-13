@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2009, Red Hat Middleware LLC, and individual contributors
+ * Copyright 2010, Red Hat Middleware LLC, and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
   *
@@ -19,28 +19,20 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.ejb3.async.spi.container.remote;
-
-import org.jboss.ejb3.async.spi.AsyncInvocationContext;
+package org.jboss.ejb3.async.spi;
 
 /**
- * RemotableAsyncInvocationProcessor
+ * View of an invocation containing an underlying
+ * {@link AsyncInvocationContext}
  * 
- * ejb3-async view of a remoteable target Container
- *
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
- * @version $Revision: $
  */
-public interface RemotableAsyncInvocationProcessor extends AsyncInvocationContext
+public interface AsyncInvocation
 {
-
-   // --------------------------------------------------------------------------------||
-   // Contracts ----------------------------------------------------------------------||
-   // --------------------------------------------------------------------------------||
-
    /**
-    * Obtains the registry holding remote async tasks 
+    * Obtains the {@link AsyncInvocationContext} associated with this
+    * invocation
+    * @return
     */
-   RemoteAsyncTaskRegistry getRemoteAsyncTaskRegistry();
-
+   AsyncInvocationContext getAsyncInvocationContext();
 }

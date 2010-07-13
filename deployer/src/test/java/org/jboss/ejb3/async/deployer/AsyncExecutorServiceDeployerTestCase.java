@@ -30,7 +30,7 @@ import org.jboss.arquillian.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.beans.metadata.api.annotations.Inject;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.ejb3.async.spi.container.AttachmentNames;
+import org.jboss.ejb3.async.spi.AttachmentNames;
 import org.jboss.reloaded.shrinkwrap.api.ShrinkWrapDeployer;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;

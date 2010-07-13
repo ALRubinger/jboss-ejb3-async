@@ -31,8 +31,8 @@ import javax.ejb.Asynchronous;
 import org.jboss.aop.advice.Interceptor;
 import org.jboss.aop.joinpoint.Invocation;
 import org.jboss.aop.joinpoint.MethodInvocation;
-import org.jboss.ejb3.async.spi.container.AsyncInvocationProcessor;
-import org.jboss.ejb3.interceptors.container.ManagedObjectAdvisor;
+import org.jboss.ejb3.async.spi.AsyncInvocation;
+import org.jboss.ejb3.async.spi.AsyncInvocationContext;
 import org.jboss.logging.Logger;
 import org.jboss.security.SecurityContext;
 
@@ -110,10 +110,10 @@ public class AsynchronousInterceptor implements Interceptor
    private Future<?> invokeAsync(final Invocation invocation)
    {
       // Get the target container
-      final AsyncInvocationProcessor container = this.getInvocationProcessor(invocation);
+      final AsyncInvocationContext context = this.getInvocationContext(invocation);
 
       // Get the ExecutorService
-      final ExecutorService executorService = container.getAsynchronousExecutor();
+      final ExecutorService executorService = context.getAsynchronousExecutor();
 
       // Get the existing SecurityContext
       final SecurityContext sc = SecurityActions.getSecurityContext();
@@ -178,14 +178,23 @@ public class AsynchronousInterceptor implements Interceptor
    }
 
    /**
-    * 
+    * Obtains the {@link AsyncInvocationContext} associated with the
+    * specified {@link Invocation}
+    * @param invocation Invocation; must be specified
     * @return
     */
-   private AsyncInvocationProcessor getInvocationProcessor(final Invocation invocation)
+   private AsyncInvocationContext getInvocationContext(final Invocation invocation)
    {
-      //TODO This won't work when we integrate w/ ejb3-core, as Advisor will need:
-      // ((ManagedObjectAdvisor) invocation.getAdvisor()).getContainer().getEJBContainer();
-      return (AsyncInvocationProcessor) ((ManagedObjectAdvisor) invocation.getAdvisor()).getContainer();
+      // Precondition checks
+      assert invocation != null : "Invocation must be specified";
+      assert invocation instanceof AsyncInvocation : "Invocation " + invocation.toString() + " must be of type "
+            + AsyncInvocation.class.getName();
+
+      // Cast
+      final AsyncInvocation asyncInvocation = (AsyncInvocation) invocation;
+
+      // Get out the context
+      return asyncInvocation.getAsyncInvocationContext();
    }
 
    // --------------------------------------------------------------------------------||

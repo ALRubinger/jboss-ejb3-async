@@ -1,14 +1,9 @@
 <aop xmlns="urn:jboss:aop-beans:1.0">
 
-  <!--
-
-    Define the interceptor per-instance for now, each interceptor will
-    need access to the container. If this may be obtained via the
-    invocation, we may make the interceptor per-JVM
-  -->
   <interceptor name="AsynchronousInterceptor"
     class="org.jboss.ejb3.async.impl.interceptor.AsynchronousInterceptor"
-    scope="PER_INSTANCE" />
+    scope="PER_VM" />
+    
 
   <domain name="Asynchronous Container">
 

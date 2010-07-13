@@ -27,7 +27,6 @@ import org.jboss.aop.Dispatcher;
 import org.jboss.ejb3.async.impl.test.common.AsyncTestUtil;
 import org.jboss.ejb3.async.impl.test.common.ThreadPoolAsyncContainer;
 import org.jboss.ejb3.async.spi.container.remote.EndpointConstants;
-import org.jboss.ejb3.async.spi.container.remote.RemotableAsyncInvocationProcessor;
 import org.jboss.ejb3.async.spi.container.remote.RemoteAsyncTaskRegistry;
 
 /**
@@ -37,8 +36,6 @@ import org.jboss.ejb3.async.spi.container.remote.RemoteAsyncTaskRegistry;
  * @version $Revision: $
  */
 public class RemotableThreadPoolAsyncContainer<T> extends ThreadPoolAsyncContainer<T>
-      implements
-         RemotableAsyncInvocationProcessor
 {
    // --------------------------------------------------------------------------------||
    // Instance Members ---------------------------------------------------------------||

@@ -69,6 +69,13 @@
       <scope>provided</scope>
     </dependency>
     
+    <dependency>
+      <groupId>org.jboss.ejb3.context</groupId>
+      <artifactId>jboss-ejb3-context-base</artifactId>
+      <version>${version.org.jboss.ejb3.context}</version>
+      <scope>test</scope>
+    </dependency>
+    
     <!-- 
     Dependencies: External to EJB3 
     -->

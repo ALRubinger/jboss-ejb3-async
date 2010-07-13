@@ -31,20 +31,27 @@
   <properties>
   
     <!-- Versioning -->
-
   
   </properties>
 
   <dependencies>
   
     <!-- 
-    Dependencies: org.jboss.ejb3 
+    Dependencies: org.jboss.ejb3.* 
     -->
-    
+    <!-- org.jboss.ejb3.context -->
+    <dependency>
+      <groupId>org.jboss.ejb3.context</groupId>
+      <artifactId>jboss-ejb3-context-spi</artifactId>
+    </dependency>
     
     <!-- 
     Dependencies: External to EJB3 
     -->
+    <dependency>
+       <groupId>${javax.ejb.groupId}</groupId>
+       <artifactId>${javax.ejb.artifactId}</artifactId>
+    </dependency>
     
   </dependencies>
 </project>

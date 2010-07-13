@@ -27,7 +27,7 @@ import org.jboss.beans.metadata.api.annotations.Inject;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.ejb3.async.spi.container.AttachmentNames;
+import org.jboss.ejb3.async.spi.AttachmentNames;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
 

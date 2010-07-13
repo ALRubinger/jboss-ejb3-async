@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.jboss.ejb3.async.impl.test.common.ThreadPoolAsyncContainer;
 import org.jboss.ejb3.async.impl.util.concurrent.ResultUnwrappingExecutorService;
-import org.jboss.ejb3.async.spi.container.AsyncInvocationProcessor;
 
 /**
  * PausableProcessingAsyncContainer
@@ -37,8 +36,7 @@ import org.jboss.ejb3.async.spi.container.AsyncInvocationProcessor;
  * @version $Revision: $
  */
 public class PausableProcessingAsyncContainer<T> extends ThreadPoolAsyncContainer<T>
-      implements
-         AsyncInvocationProcessor
+
 {
 
    // --------------------------------------------------------------------------------||

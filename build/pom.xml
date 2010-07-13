@@ -28,6 +28,11 @@
 
     <!-- Versioning -->
     <version.junit_junit>4.6</version.junit_junit>
+    <version.org.jboss.ejb3.context>0.2.0</version.org.jboss.ejb3.context>
+    
+    <javax.ejb.groupId>org.jboss.javaee</javax.ejb.groupId>
+    <javax.ejb.artifactId>jboss-ejb-api</javax.ejb.artifactId>
+    <javax.ejb.version>3.0.0.GA</javax.ejb.version>
 
   </properties>
 
@@ -128,6 +133,20 @@
         <artifactId>junit</artifactId>
         <version>${version.junit_junit}</version>
         <scope>test</scope>
+      </dependency>
+      
+      <!-- org.jboss.ejb3.context -->
+      <dependency>
+        <groupId>org.jboss.ejb3.context</groupId>
+        <artifactId>jboss-ejb3-context-spi</artifactId>
+        <version>${version.org.jboss.ejb3.context}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>${javax.ejb.groupId}</groupId>
+        <artifactId>${javax.ejb.artifactId}</artifactId>
+        <version>${javax.ejb.version}</version>
+        <scope>provided</scope>
       </dependency>
 
     </dependencies>
