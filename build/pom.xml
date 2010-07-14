@@ -38,9 +38,9 @@
 
   <!-- SCM -->
   <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/ejb3/components/asynchronous</connection>
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/ejb3/components/asynchronous</developerConnection>
-    <url>http://anonsvn.jboss.org/repos/jbossas/projects/ejb3/components/asynchronous</url>
+    <connection>scm:git:git://github.com/jbossejb3/jboss-ejb3-async.git</connection>
+    <developerConnection>scm:git:git@github.com:jbossejb3/jboss-ejb3-async.git</developerConnection>
+    <url>http://github.com/jbossejb3/jboss-ejb3-async</url>
   </scm>
 
   <!-- Issues -->
