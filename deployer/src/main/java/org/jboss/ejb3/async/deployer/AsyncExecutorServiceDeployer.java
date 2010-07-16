@@ -82,7 +82,11 @@ public class AsyncExecutorServiceDeployer extends AbstractDeployer
     */
    public void deploy(final DeploymentUnit unit) throws DeploymentException
    {
-      log.info("Processing: " + unit);
+      // Log we're here
+      if (log.isTraceEnabled())
+      {
+         log.trace("Processing: " + unit);
+      }
       // If not an EJB3 deployment, take no action
       if (!this.isEjb3Deployment(unit))
       {
