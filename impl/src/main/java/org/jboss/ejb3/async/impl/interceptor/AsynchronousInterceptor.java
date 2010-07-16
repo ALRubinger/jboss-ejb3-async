@@ -165,7 +165,8 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
       final Method actualMethod = si.getActualMethod();
 
       // Determine if asynchronous (either returns Future or has @Asynchronous)
-      if (invocation.resolveAnnotation(Asynchronous.class) != null || actualMethod.getReturnType().equals(Future.class))
+      if (invocation.resolveAnnotation(Asynchronous.class) != null || actualMethod.getReturnType().equals(Future.class)
+            || actualMethod.getClass().getAnnotation(Asynchronous.class) != null)
       {
          // Log
          if (log.isTraceEnabled())
