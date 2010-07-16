@@ -21,6 +21,7 @@
  */
 package org.jboss.ejb3.async.impl.interceptor;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -31,28 +32,40 @@ import javax.ejb.Asynchronous;
 import org.jboss.aop.advice.Interceptor;
 import org.jboss.aop.joinpoint.Invocation;
 import org.jboss.aop.joinpoint.MethodInvocation;
+import org.jboss.ejb3.async.impl.ClientExecutorService;
 import org.jboss.ejb3.async.spi.AsyncInvocation;
 import org.jboss.ejb3.async.spi.AsyncInvocationContext;
 import org.jboss.logging.Logger;
 import org.jboss.security.SecurityContext;
 
 /**
- * AsynchronousInterceptor
- *
  * Examines invocation metadata to determine if this
  * should be handled asynchronously; if so, short-circuits and
- * spawns off into a new Thread, returning a handle back to the client
+ * spawns off into a new Thread.
+ * 
+ * If the invocation has been equipped with an {@link AsyncInvocationContext} 
+ * (ie. is of type {@link AsyncInvocation}), the associated {@link ExecutorService}
+ * will be used.  Else we'll provide an {@link ExecutorService}
+ * implementation on behalf of the client.
  *
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
  * @version $Revision: $
  */
-public class AsynchronousInterceptor implements Interceptor
+public class AsynchronousInterceptor implements Interceptor, Serializable
 {
 
    // --------------------------------------------------------------------------------||
    // Class Members ------------------------------------------------------------------||
    // --------------------------------------------------------------------------------||
+   
+   /**
+    * serialVersionUID
+    */
+   private static final long serialVersionUID = 1L;
 
+   /**
+    * Logger
+    */
    private static final Logger log = Logger.getLogger(AsynchronousInterceptor.class);
 
    // --------------------------------------------------------------------------------||
@@ -71,7 +84,8 @@ public class AsynchronousInterceptor implements Interceptor
    // Required Implementations -------------------------------------------------------||
    // --------------------------------------------------------------------------------||
 
-   /* (non-Javadoc)
+   /**
+    * {@inheritDoc}
     * @see org.jboss.aop.advice.Interceptor#getName()
     */
    public String getName()
@@ -79,7 +93,8 @@ public class AsynchronousInterceptor implements Interceptor
       return this.getClass().getSimpleName();
    }
 
-   /* (non-Javadoc)
+   /**
+    * {@inheritDocs}
     * @see org.jboss.aop.advice.Interceptor#invoke(org.jboss.aop.joinpoint.Invocation)
     */
    public Object invoke(final Invocation invocation) throws Throwable
@@ -109,17 +124,14 @@ public class AsynchronousInterceptor implements Interceptor
     */
    private Future<?> invokeAsync(final Invocation invocation)
    {
-      // Get the target container
-      final AsyncInvocationContext context = this.getInvocationContext(invocation);
-
-      // Get the ExecutorService
-      final ExecutorService executorService = context.getAsynchronousExecutor();
+      // Get the appropriate ExecutorService
+      final ExecutorService executorService = this.getAsyncExecutor(invocation);
 
       // Get the existing SecurityContext
       final SecurityContext sc = SecurityActions.getSecurityContext();
 
       // Copy the invocation (must be done for Thread safety, as we spawn this off and 
-      // subsequent calls can mess with the internal interceptor index
+      // subsequent calls can mess with the internal interceptor index)
       final Invocation nextInvocation = invocation.copy();
 
       // Make the asynchronous task from the invocation
@@ -127,6 +139,10 @@ public class AsynchronousInterceptor implements Interceptor
 
       // Short-circuit the invocation into new Thread 
       final Future<Object> task = executorService.submit(asyncTask);
+      if (log.isTraceEnabled())
+      {
+         log.trace("Submitting async invocation " + invocation + " via " + executorService);
+      }
 
       // Return
       return task;
@@ -178,23 +194,39 @@ public class AsynchronousInterceptor implements Interceptor
    }
 
    /**
-    * Obtains the {@link AsyncInvocationContext} associated with the
-    * specified {@link Invocation}
-    * @param invocation Invocation; must be specified
+    * Obtains an appropriate {@link ExecutorService} to handle the invocation
+    * based upon the type of {@link Invocation} provided.  If we're got a 
+    * {@link AsyncInvocation}, the associated {@link ExecutorService} will be used,
+    * else we'll supply a default one.
+    * 
+    * @param invocation
     * @return
     */
-   private AsyncInvocationContext getInvocationContext(final Invocation invocation)
+   private ExecutorService getAsyncExecutor(final Invocation invocation)
    {
       // Precondition checks
       assert invocation != null : "Invocation must be specified";
-      assert invocation instanceof AsyncInvocation : "Invocation " + invocation.toString() + " must be of type "
-            + AsyncInvocation.class.getName();
 
-      // Cast
-      final AsyncInvocation asyncInvocation = (AsyncInvocation) invocation;
+      // If this invocation has been equipped with an associated ES
+      if (invocation instanceof AsyncInvocation)
+      {
 
-      // Get out the context
-      return asyncInvocation.getAsyncInvocationContext();
+         // Cast
+         final AsyncInvocation asyncInvocation = (AsyncInvocation) invocation;
+
+         // Get out the ES
+         final AsyncInvocationContext context = asyncInvocation.getAsyncInvocationContext();
+         assert context != null : "async invocation context of " + invocation + " was null";
+         final ExecutorService es = context.getAsynchronousExecutor();
+         assert es != null : ExecutorService.class.getSimpleName() + " associated with " + context + " was null";
+         return es;
+
+      }
+      // Supply our own ES for the client
+      else
+      {
+         return ClientExecutorService.INSTANCE;
+      }
    }
 
    // --------------------------------------------------------------------------------||

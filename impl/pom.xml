@@ -30,9 +30,8 @@
   <properties>
   
     <!-- Versioning -->
-    <version.org.jboss.aop_jboss-aop>2.1.1.GA</version.org.jboss.aop_jboss-aop>
     <version.org.jboss.aspects_jboss.aspects.common>1.0.0.Beta1</version.org.jboss.aspects_jboss.aspects.common>
-    <version.org.jboss.aspects_jboss.remoting.aspects>1.0.2</version.org.jboss.aspects_jboss.remoting.aspects>
+    <version.org.jboss.aop_jboss-aop>2.1.1.GA</version.org.jboss.aop_jboss-aop>
     <version.org.jboss.javaee_jboss.ejb.api_3.1>1.0-alpha-1</version.org.jboss.javaee_jboss.ejb.api_3.1>
     <version.org.jboss.ejb3_jboss.ejb3.interceptors>1.0.0</version.org.jboss.ejb3_jboss.ejb3.interceptors>
     <version.org.jboss.security_jboss.security>2.0.2.SP6</version.org.jboss.security_jboss.security>
@@ -95,14 +94,6 @@
       <scope>provided</scope>
     </dependency>
     
-    <!-- org.jboss.aspects:jboss-remoting-aspects -->
-    <dependency>
-      <groupId>org.jboss.aspects</groupId>
-      <artifactId>jboss-remoting-aspects</artifactId>
-      <version>${version.org.jboss.aspects_jboss.remoting.aspects}</version>
-      <scope>provided</scope>
-    </dependency>
-    
     <!-- org.jboss.aspects:jboss-aspects-common -->
     <dependency>
       <groupId>org.jboss.aspects</groupId>
@@ -136,4 +127,5 @@
     </dependency>
     
   </dependencies>
+  
 </project>
