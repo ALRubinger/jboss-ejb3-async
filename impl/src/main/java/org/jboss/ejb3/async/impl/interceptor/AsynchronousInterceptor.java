@@ -192,7 +192,8 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
 //      log.info("resolve annotation from invocation: " + invocation.resolveAnnotation(Asynchronous.class));
 //      log.info("Future type: "+ actualMethod.getReturnType().isAssignableFrom(Future.class));
 //      log.info("annotation on actul method: " + actualMethod.getClass().getAnnotation(Asynchronous.class) != null);
-      if (invocation.resolveAnnotation(Asynchronous.class) != null || actualMethod.getReturnType().isAssignableFrom(Future.class)
+      if (invocation.resolveAnnotation(Asynchronous.class) != null
+            || Future.class.isAssignableFrom(actualMethod.getReturnType())
             || actualMethod.getClass().getAnnotation(Asynchronous.class) != null)
       {
          // Log
