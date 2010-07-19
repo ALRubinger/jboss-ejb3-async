@@ -57,7 +57,7 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
    // --------------------------------------------------------------------------------||
    // Class Members ------------------------------------------------------------------||
    // --------------------------------------------------------------------------------||
-   
+
    /**
     * serialVersionUID
     */
@@ -67,6 +67,15 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
     * Logger
     */
    private static final Logger log = Logger.getLogger(AsynchronousInterceptor.class);
+
+   /*
+    * Metadata attachments flagging this invocation's already been dispatched
+    */
+   private static final String INVOCATION_METADATA_TAG = "ASYNC";
+
+   private static final String INVOCATION_METADATA_ATTR = "BEEN_HERE";
+
+   private static final String INVOCATION_METADATA_VALUE = Boolean.TRUE.toString();
 
    // --------------------------------------------------------------------------------||
    // Constructor --------------------------------------------------------------------||
@@ -134,6 +143,10 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
       // subsequent calls can mess with the internal interceptor index)
       final Invocation nextInvocation = invocation.copy();
 
+      // Mark that we've already been async'd, so when the invocation comes around again we don't infinite loop
+      nextInvocation.getMetaData().addMetaData(INVOCATION_METADATA_TAG, INVOCATION_METADATA_ATTR,
+            INVOCATION_METADATA_VALUE);
+
       // Make the asynchronous task from the invocation
       final Callable<Object> asyncTask = new AsyncInvocationTask<Object>(nextInvocation, sc);
 
@@ -161,22 +174,38 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
             + MethodInvocation.class.getSimpleName() + ", but has been passed: " + invocation;
       final MethodInvocation si = (MethodInvocation) invocation;
 
+//      log.info("CHECKING IF WE'VE BEEN HERE");
+      // See if we've already been here, if so, don't handle as async
+      final String beenHere = (String) invocation.getMetaData().getMetaData(INVOCATION_METADATA_TAG,
+            INVOCATION_METADATA_ATTR);
+      if (beenHere != null && beenHere.equals(INVOCATION_METADATA_VALUE))
+      {
+         // Do not handle
+         return false;
+      }
+
       // Get the actual method
       final Method actualMethod = si.getActualMethod();
 
       // Determine if asynchronous (either returns Future or has @Asynchronous)
-      if (invocation.resolveAnnotation(Asynchronous.class) != null || actualMethod.getReturnType().equals(Future.class)
+//      log.info("CHECKING IF ASYNC?");
+//      log.info("resolve annotation from invocation: " + invocation.resolveAnnotation(Asynchronous.class));
+//      log.info("Future type: "+ actualMethod.getReturnType().isAssignableFrom(Future.class));
+//      log.info("annotation on actul method: " + actualMethod.getClass().getAnnotation(Asynchronous.class) != null);
+      if (invocation.resolveAnnotation(Asynchronous.class) != null || actualMethod.getReturnType().isAssignableFrom(Future.class)
             || actualMethod.getClass().getAnnotation(Asynchronous.class) != null)
       {
          // Log
          if (log.isTraceEnabled())
          {
-            log.trace("Intercepted: " + actualMethod);
+            log.trace("Dispatching as @Asynchronous: " + actualMethod);
          }
+//         log.info("YES, THIS IS ASYNC");
 
          // We'll take it
          return true;
       }
+//      log.info("NOT ASYNC");
 
       //TODO 
       /*

@@ -31,7 +31,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-
 /**
  * {@link ExecutorService} implementation which submits all
  * incoming {@link Callable}s or {@link Runnable}s as
@@ -98,7 +97,7 @@ public class ResultUnwrappingExecutorService implements ExecutorService
          throw new NullPointerException();
       final FutureTask<T> ftask = new ResultUnwrappingFuture<T>(task);
       delegate.execute(ftask);
-      return ftask;
+      return new LocalJvmSerializableFutureWrapper<T>(ftask);
    }
 
    /**
@@ -112,7 +111,7 @@ public class ResultUnwrappingExecutorService implements ExecutorService
          throw new NullPointerException();
       final FutureTask<T> ftask = new ResultUnwrappingFuture<T>(task, result);
       delegate.execute(ftask);
-      return ftask;
+      return new LocalJvmSerializableFutureWrapper<T>(ftask);
    }
 
    /**
@@ -126,7 +125,7 @@ public class ResultUnwrappingExecutorService implements ExecutorService
          throw new NullPointerException();
       final FutureTask<Object> ftask = new ResultUnwrappingFuture<Object>(task, null);
       delegate.execute(ftask);
-      return ftask;
+      return new LocalJvmSerializableFutureWrapper<Object>(ftask);
    }
 
    /*

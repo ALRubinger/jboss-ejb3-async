@@ -24,6 +24,7 @@ package org.jboss.ejb3.async.impl.test.common;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.jboss.ejb3.async.impl.ClientExecutorService;
 import org.jboss.ejb3.async.impl.util.concurrent.ResultUnwrappingExecutorService;
 
 /**
@@ -63,7 +64,7 @@ public final class AsyncTestUtil
     */
    public static ExecutorService getDefaultAsyncExecutorService()
    {
-      return new ResultUnwrappingExecutorService(Executors.newCachedThreadPool());
+      return ClientExecutorService.INSTANCE;
    }
 
 }
