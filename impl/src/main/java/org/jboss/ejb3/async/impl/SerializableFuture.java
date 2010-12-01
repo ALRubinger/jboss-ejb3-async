@@ -30,7 +30,7 @@ import java.util.concurrent.TimeoutException;
 import javax.ejb.AsyncResult;
 
 /**
- * Alternative implementaation of a {@link Future}
+ * Alternative implementation of a {@link Future}
  * supporting serialization.  Used to send {@link AsyncResult}
  * values as returned by the bean provider over the wire.
  * 

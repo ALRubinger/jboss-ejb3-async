@@ -27,8 +27,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import javax.ejb.Asynchronous;
-
 import org.jboss.aop.advice.Interceptor;
 import org.jboss.aop.joinpoint.Invocation;
 import org.jboss.aop.joinpoint.MethodInvocation;
@@ -36,6 +34,9 @@ import org.jboss.ejb3.async.impl.ClientExecutorService;
 import org.jboss.ejb3.async.spi.AsyncInvocation;
 import org.jboss.ejb3.async.spi.AsyncInvocationContext;
 import org.jboss.logging.Logger;
+import org.jboss.metadata.ejb.spec.AsyncMethodMetaData;
+import org.jboss.metadata.ejb.spec.AsyncMethodsMetaData;
+import org.jboss.metadata.ejb.spec.MethodParametersMetaData;
 import org.jboss.security.SecurityContext;
 
 /**
@@ -78,15 +79,26 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
    private static final String INVOCATION_METADATA_VALUE = Boolean.TRUE.toString();
 
    // --------------------------------------------------------------------------------||
+   // Instance Members ---------------------------------------------------------------||
+   // --------------------------------------------------------------------------------||
+
+   /**
+    * Asynchronous Methods to be handled by this interceptor
+    */
+   private final AsyncMethodsMetaData asyncMethods;
+
+   // --------------------------------------------------------------------------------||
    // Constructor --------------------------------------------------------------------||
    // --------------------------------------------------------------------------------||
 
    /**
-    * No-arg constructor required
+    * Constructor
     */
-   public AsynchronousInterceptor()
+   public AsynchronousInterceptor(final AsyncMethodsMetaData asyncMethods)
    {
-      log.debug("Created: " + this);
+      assert asyncMethods != null : "Async Methods must be supplied";
+      this.asyncMethods = asyncMethods;
+      log.debug("Created: " + this + " to handle " + asyncMethods);
    }
 
    // --------------------------------------------------------------------------------||
@@ -170,57 +182,69 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
    private boolean isAsyncInvocation(final Invocation invocation)
    {
       // Precondition check
+      if (log.isTraceEnabled())
+      {
+         log.trace("Checking to see if async: " + invocation);
+      }
       assert invocation instanceof MethodInvocation : this.getClass().getName() + " supports only "
             + MethodInvocation.class.getSimpleName() + ", but has been passed: " + invocation;
       final MethodInvocation si = (MethodInvocation) invocation;
 
-//      log.info("CHECKING IF WE'VE BEEN HERE");
-      // See if we've already been here, if so, don't handle as async
+      //       See if we've already been here, if so, don't handle as async
       final String beenHere = (String) invocation.getMetaData().getMetaData(INVOCATION_METADATA_TAG,
             INVOCATION_METADATA_ATTR);
       if (beenHere != null && beenHere.equals(INVOCATION_METADATA_VALUE))
       {
          // Do not handle
+         if(log.isTraceEnabled())
+         {
+            log.trace("Been here, not dispatching as async again");
+         }
          return false;
       }
 
       // Get the actual method
       final Method actualMethod = si.getActualMethod();
 
-      // Determine if asynchronous (either returns Future or has @Asynchronous)
-//      log.info("CHECKING IF ASYNC?");
-//      log.info("resolve annotation from invocation: " + invocation.resolveAnnotation(Asynchronous.class));
-//      log.info("Future type: "+ actualMethod.getReturnType().isAssignableFrom(Future.class));
-//      log.info("annotation on actul method: " + actualMethod.getClass().getAnnotation(Asynchronous.class) != null);
-      if (invocation.resolveAnnotation(Asynchronous.class) != null
-            || Future.class.isAssignableFrom(actualMethod.getReturnType())
-            || actualMethod.getClass().getAnnotation(Asynchronous.class) != null)
+      // Loop through the declared async methods for this EJB
+      for (final AsyncMethodMetaData asyncMethod : asyncMethods)
       {
-         // Log
-         if (log.isTraceEnabled())
+         // Name matches?
+         final String invokedMethodName = actualMethod.getName();
+         if (invokedMethodName.equals(asyncMethod.getMethodName()))
          {
-            log.trace("Dispatching as @Asynchronous: " + actualMethod);
+            log.info("Async method names match: " + invokedMethodName);
+
+            // Params match?
+            final MethodParametersMetaData asyncParams = asyncMethod.getMethodParams();
+            final Class<?>[] invokedParams = actualMethod.getParameterTypes();
+            final int invokedParamsSize = invokedParams.length;
+            if (asyncParams.size() != invokedParams.length)
+            {
+               log.info("Different async params size, no match");
+               return false;
+            }
+            for (int i = 0; i < invokedParamsSize; i++)
+            {
+               final String invokedParamTypeName = invokedParams[i].getName();
+               final String declaredName = asyncParams.get(i);
+               if (!invokedParamTypeName.equals(declaredName))
+               {
+                  return false;
+               }
+            }
+
+            // Name and params all match
+            if (log.isTraceEnabled())
+            {
+               log.trace("Dispatching as @Asynchronous: " + actualMethod);
+            }
+            return true;
          }
-//         log.info("YES, THIS IS ASYNC");
-
-         // We'll take it
-         return true;
       }
-//      log.info("NOT ASYNC");
 
-      //TODO 
-      /*
-       * Business interface defines method with same name, arguments, return type Future<V>
-       * of bean impl class is eligible for async handling
-       */
-
-      //TODO 
-      /*
-       * Would be better handled by jboss-metadata
-       * (ie. JBossSessionBeanMetadata.getAsynchronousMethods().match(method))) 
-       */
-
-      // Has met no conditions
+      // Not async
+      log.info("NOT ASYNC");
       return false;
    }
 

@@ -1,8 +1,8 @@
 <aop xmlns="urn:jboss:aop-beans:1.0">
 
   <interceptor name="AsynchronousInterceptor"
-    class="org.jboss.ejb3.async.impl.interceptor.AsynchronousInterceptor"
-    scope="PER_VM" />
+    factory="org.jboss.ejb3.async.impl.test.interceptor.TestAsynchronousInterceptorFactory"
+    scope="PER_INSTANCE" />
     
 
   <domain name="Asynchronous Container">
