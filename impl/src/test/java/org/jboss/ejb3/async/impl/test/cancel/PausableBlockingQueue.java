@@ -56,17 +56,9 @@ public class PausableBlockingQueue<E> implements BlockingQueue<E>
 
    private final BlockingQueue<E> delegate;
 
-   private final BlockingQueue<E> backlogQueue;
+   private final BlockingQueue<E> backlog;
 
-   /**
-    * A reference to the current queue to be consulted in polling
-    */
-   /*
-    * volatile because we don't want to synchronize access 
-    * here for queue operations "offer" and "take", but we
-    * need the Thread visibility to be correct
-    */
-   private volatile BlockingQueue<E> currentQueue;
+   private volatile boolean active;
 
    private static final String MSG_UNSUPPORTED = "Should not be used in testing";
 
@@ -77,20 +69,20 @@ public class PausableBlockingQueue<E> implements BlockingQueue<E>
    public PausableBlockingQueue(boolean active)
    {
       this.delegate = new ArrayBlockingQueue<E>(10);
-      this.backlogQueue = new ArrayBlockingQueue<E>(10);
-      this.currentQueue = active ? this.delegate : this.backlogQueue;
+      this.backlog = new ArrayBlockingQueue<E>(10);
+      this.active = active;
    }
 
    // --------------------------------------------------------------------------------||
    // Functional Methods -------------------------------------------------------------||
    // --------------------------------------------------------------------------------||
 
-   public boolean isActive()
+   boolean isActive()
    {
-      return this.currentQueue == this.delegate ? true : false;
+      return this.active;
    }
 
-   public void pause()
+   synchronized void pause()
    {
       if (!this.isActive())
       {
@@ -98,15 +90,16 @@ public class PausableBlockingQueue<E> implements BlockingQueue<E>
          return;
       }
 
-      // Atomic
-      synchronized (this.currentQueue)
-      {
-         this.currentQueue = this.backlogQueue;
-         log.info(this + ": Paused");
-      }
+      // Move everything to the backlog
+      this.delegate.drainTo(this.backlog);
+
+      // Set flag
+      this.active = false;
+
+      log.info("Paused");
    }
 
-   public void resume()
+   synchronized void resume()
    {
       if (this.isActive())
       {
@@ -114,18 +107,13 @@ public class PausableBlockingQueue<E> implements BlockingQueue<E>
          return;
       }
 
-      // Atomic
-      synchronized (this.currentQueue)
-      {
-         // Drain to the delegate from the backlog
-         this.backlogQueue.drainTo(this.delegate);
+      // Move everything back into the delegate
+      this.backlog.drainTo(this.delegate);
 
-         // Set the correct current queue
-         this.currentQueue = this.delegate;
+      // Set flag
+      this.active = true;
 
-         // Log
-         log.info(this + ": Resumed");
-      }
+      log.info("Resumed");
    }
 
    // --------------------------------------------------------------------------------||
@@ -135,135 +123,167 @@ public class PausableBlockingQueue<E> implements BlockingQueue<E>
    /**
     * Offers to the current queue in play
     */
+   @Override
    public boolean offer(final E o)
    {
-      final BlockingQueue<E> current = this.currentQueue;
-      log.info("Offering: " + o + " to " + current);
-      return current.offer(o);
+      if (this.isActive())
+      {
+         log.info("Offering: " + o + " to " + delegate);
+         return delegate.offer(o);
+      }
+      else
+      {
+         backlog.add(o);
+         return true;
+      }
    }
 
+   @Override
    public E take() throws InterruptedException
    {
-      final BlockingQueue<E> current = this.currentQueue;
-      final E obj = current.take();
-      log.info("Taking : " + obj);
-      return obj;
+      log.info("Taking from delegate: " + delegate);
+      log.info("Backlog is: " + this.backlog);
+      final E value = this.delegate.take();
+      log.info("Got: " + value);
+      return value;
    }
 
+   @Override
    public boolean isEmpty()
    {
-      return this.currentQueue.isEmpty();
+      return this.delegate.isEmpty();
    }
 
    /*
     * UNSUPPORTED below this marker
     */
-
+   @Override
    public boolean add(E o)
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public int drainTo(Collection<? super E> c)
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public int drainTo(Collection<? super E> c, int maxElements)
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public boolean offer(E o, long timeout, TimeUnit unit) throws InterruptedException
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public E poll(long timeout, TimeUnit unit) throws InterruptedException
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public void put(E o) throws InterruptedException
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public int remainingCapacity()
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public E element()
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public E peek()
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public E poll()
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public E remove()
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public boolean addAll(Collection<? extends E> c)
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public void clear()
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public boolean contains(Object o)
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public boolean containsAll(Collection<?> c)
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public Iterator<E> iterator()
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public boolean remove(Object o)
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public boolean removeAll(Collection<?> c)
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public boolean retainAll(Collection<?> c)
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public int size()
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public Object[] toArray()
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);
    }
 
+   @Override
    public <T> T[] toArray(T[] a)
    {
       throw new UnsupportedOperationException(MSG_UNSUPPORTED);

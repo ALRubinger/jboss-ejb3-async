@@ -2,7 +2,7 @@
 
   <interceptor name="AsynchronousInterceptor"
     factory="org.jboss.ejb3.async.impl.test.interceptor.TestAsynchronousInterceptorFactory"
-    scope="PER_INSTANCE" />
+    scope="PER_CLASS" />
     
 
   <domain name="Asynchronous Container">

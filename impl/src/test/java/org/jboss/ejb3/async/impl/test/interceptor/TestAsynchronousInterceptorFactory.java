@@ -28,9 +28,8 @@ import java.lang.reflect.Method;
 import javax.ejb.Asynchronous;
 
 import org.jboss.aop.Advisor;
-import org.jboss.aop.InstanceAdvisor;
 import org.jboss.ejb3.async.impl.interceptor.AsynchronousInterceptor;
-import org.jboss.ejb3.async.impl.interceptor.CreatePerInstanceAspectFactory;
+import org.jboss.ejb3.async.impl.interceptor.CreatePerClassAspectFactory;
 import org.jboss.ejb3.interceptors.container.ManagedObjectAdvisor;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.ejb.spec.AsyncMethodMetaData;
@@ -43,7 +42,7 @@ import org.jboss.metadata.ejb.spec.MethodParametersMetaData;
  * 
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
  */
-public class TestAsynchronousInterceptorFactory extends CreatePerInstanceAspectFactory
+public class TestAsynchronousInterceptorFactory extends CreatePerClassAspectFactory
 {
 
    // --------------------------------------------------------------------------------||
@@ -61,10 +60,10 @@ public class TestAsynchronousInterceptorFactory extends CreatePerInstanceAspectF
 
    /**
     * {@inheritDoc}
-    * @see org.jboss.aop.advice.AspectFactory#createPerInstance(org.jboss.aop.Advisor, org.jboss.aop.InstanceAdvisor)
+    * @see org.jboss.aop.advice.AspectFactory#createPerClass(org.jboss.aop.Advisor)
     */
    @Override
-   public Object createPerInstance(final Advisor advisor, final InstanceAdvisor instanceAdvisor)
+   public Object createPerClass(final Advisor advisor)
    {
       // Create the interceptor instance
       final AsyncMethodsMetaData asyncMethods = new AsyncMethodsMetaData();

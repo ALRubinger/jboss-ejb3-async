@@ -192,8 +192,7 @@ public class ResultUnwrappingExecutorService implements ExecutorService
    @Override
    public void execute(Runnable command)
    {
-      // TODO Auto-generated method stub
-
+      delegate.execute(command);
    }
 
 }

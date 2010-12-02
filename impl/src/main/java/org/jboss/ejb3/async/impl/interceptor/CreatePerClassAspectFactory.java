@@ -7,11 +7,11 @@ import org.jboss.aop.joinpoint.Joinpoint;
 
 /**
  * Factory to create interceptor instances.
- * Only to be used in scope PER_INSTANCE
+ * Only to be used in scope PER_CLASS
  * 
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
  */
-public abstract class CreatePerInstanceAspectFactory implements AspectFactory
+public abstract class CreatePerClassAspectFactory implements AspectFactory
 {
 
    // --------------------------------------------------------------------------------||
@@ -19,9 +19,9 @@ public abstract class CreatePerInstanceAspectFactory implements AspectFactory
    // --------------------------------------------------------------------------------||
 
    /**
-    * Exception raised if used in any scope other than PER_INSTANCE
+    * Exception raised if used in any scope other than PER_CLASS
     */
-   private static RuntimeException RTE = new RuntimeException("Only to be used PER_INSTANCE");
+   private static RuntimeException RTE = new RuntimeException("Only to be used PER_CLASS");
 
    // --------------------------------------------------------------------------------||
    // Required Implementations -------------------------------------------------------||
@@ -39,10 +39,10 @@ public abstract class CreatePerInstanceAspectFactory implements AspectFactory
 
    /**
     * {@inheritDoc}
-    * @see org.jboss.aop.advice.AspectFactory#createPerClass(org.jboss.aop.Advisor)
+    * @see org.jboss.aop.advice.AspectFactory#createPerInstance(org.jboss.aop.Advisor, org.jboss.aop.InstanceAdvisor)
     */
    @Override
-   public Object createPerClass(final Advisor advisor)
+   public Object createPerInstance(final Advisor advisor, final InstanceAdvisor instanceAdvisor)
    {
       throw RTE;
    }

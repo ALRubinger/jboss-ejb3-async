@@ -21,11 +21,9 @@
  */
 package org.jboss.ejb3.async.impl.test.cancel;
 
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.jboss.ejb3.async.impl.test.common.ThreadPoolAsyncContainer;
-import org.jboss.ejb3.async.impl.util.concurrent.ResultUnwrappingExecutorService;
 
 /**
  * PausableProcessingAsyncContainer
@@ -38,7 +36,6 @@ import org.jboss.ejb3.async.impl.util.concurrent.ResultUnwrappingExecutorService
 public class PausableProcessingAsyncContainer<T> extends ThreadPoolAsyncContainer<T>
 
 {
-
    // --------------------------------------------------------------------------------||
    // Instance Members ---------------------------------------------------------------||
    // --------------------------------------------------------------------------------||
@@ -46,7 +43,14 @@ public class PausableProcessingAsyncContainer<T> extends ThreadPoolAsyncContaine
    /**
     * Underlying pausable queue
     */
-   private PausableBlockingQueue<Runnable> queue;
+   private final PausableBlockingQueue<Runnable> queue;
+
+   private final PausableThreadPoolExecutor executor;
+
+   /**
+    * Whether or not this container is active
+    */
+   private volatile boolean active;
 
    // --------------------------------------------------------------------------------||
    // Constructor --------------------------------------------------------------------||
@@ -56,11 +60,12 @@ public class PausableProcessingAsyncContainer<T> extends ThreadPoolAsyncContaine
     * Internal ctor
     */
    private PausableProcessingAsyncContainer(final String name, final String domainName,
-         final Class<? extends T> beanClass, PausableBlockingQueue<Runnable> queue)
+         final Class<? extends T> beanClass, final PausableBlockingQueue<Runnable> queue,
+         final PausableThreadPoolExecutor executor)
    {
-      super(name, domainName, beanClass, new ResultUnwrappingExecutorService(new ThreadPoolExecutor(3, 6, 3,
-            TimeUnit.SECONDS, queue)));
+      super(name, domainName, beanClass, executor);
       this.queue = queue;
+      this.executor = executor;
    }
 
    /**
@@ -75,7 +80,8 @@ public class PausableProcessingAsyncContainer<T> extends ThreadPoolAsyncContaine
          final Class<T> beanClass)
    {
       final PausableBlockingQueue<Runnable> queue = new PausableBlockingQueue<Runnable>(false);
-      return new PausableProcessingAsyncContainer<T>(name, domainName, beanClass, queue);
+      final PausableThreadPoolExecutor executor = new PausableThreadPoolExecutor(3, 6, 3, TimeUnit.SECONDS, queue);
+      return new PausableProcessingAsyncContainer<T>(name, domainName, beanClass, queue, executor);
    }
 
    /**
@@ -85,6 +91,28 @@ public class PausableProcessingAsyncContainer<T> extends ThreadPoolAsyncContaine
    public PausableBlockingQueue<Runnable> getQueue()
    {
       return queue;
+   }
+
+   public synchronized void pause()
+   {
+      if (!active)
+      {
+         return;
+      }
+      this.queue.pause();
+      this.executor.pause();
+      active = false;
+   }
+
+   public synchronized void resume()
+   {
+      if (active)
+      {
+         return;
+      }
+      this.queue.resume();
+      this.executor.resume();
+      active = true;
    }
 
 }

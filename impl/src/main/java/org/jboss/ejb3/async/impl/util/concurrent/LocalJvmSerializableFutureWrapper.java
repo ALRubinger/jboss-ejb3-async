@@ -33,7 +33,7 @@ import java.util.concurrent.TimeoutException;
 import org.jboss.logging.Logger;
 
 /**
- * Simple wrapper which makes {@link Future} implmentations {@link Serializable}
+ * Simple wrapper which makes {@link Future} implementations {@link Serializable}
  * with the following restrictions:
  * 
  * 1) Only one serialization request using this class may be made per-Thread at any time

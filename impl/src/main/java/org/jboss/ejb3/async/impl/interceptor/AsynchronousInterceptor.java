@@ -196,7 +196,7 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
       if (beenHere != null && beenHere.equals(INVOCATION_METADATA_VALUE))
       {
          // Do not handle
-         if(log.isTraceEnabled())
+         if (log.isTraceEnabled())
          {
             log.trace("Been here, not dispatching as async again");
          }
@@ -213,7 +213,10 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
          final String invokedMethodName = actualMethod.getName();
          if (invokedMethodName.equals(asyncMethod.getMethodName()))
          {
-            log.info("Async method names match: " + invokedMethodName);
+            if (log.isTraceEnabled())
+            {
+               log.trace("Async method names match: " + invokedMethodName);
+            }
 
             // Params match?
             final MethodParametersMetaData asyncParams = asyncMethod.getMethodParams();
@@ -221,7 +224,10 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
             final int invokedParamsSize = invokedParams.length;
             if (asyncParams.size() != invokedParams.length)
             {
-               log.info("Different async params size, no match");
+               if (log.isTraceEnabled())
+               {
+                  log.trace("Different async params size, no match");
+               }
                return false;
             }
             for (int i = 0; i < invokedParamsSize; i++)
@@ -244,7 +250,10 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
       }
 
       // Not async
-      log.info("NOT ASYNC");
+      if (log.isTraceEnabled())
+      {
+         log.trace("Not @Asynchronous: " + invocation);
+      }
       return false;
    }
 

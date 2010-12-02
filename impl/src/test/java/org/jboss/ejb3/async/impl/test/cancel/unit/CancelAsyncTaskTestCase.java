@@ -95,7 +95,7 @@ public class CancelAsyncTaskTestCase
 
       // Set the container to allow processing
       final PausableBlockingQueue<?> queue = (PausableBlockingQueue<?>) container.getQueue();
-      queue.resume();
+      container.resume();
       log.info("Work queue is active");
 
       /*
@@ -128,14 +128,13 @@ public class CancelAsyncTaskTestCase
        */
 
       // Set the container to pause processing
-      queue.pause();
+      container.pause();
       log.info("Work queue is paused");
 
       // Increment the counter, then get the result
       final Future<Void> secondIncrementCounterFuture = (Future<Void>) container.invoke(bean,
             TestConstants.METHOD_NAME_INCREMENT_COUNTER_ASYNCHRONOUS);
 
-      // Cancel and test
       final boolean isCancelled = secondIncrementCounterFuture.cancel(true);
       TestCase.assertTrue("Request to cancel() reporting not honored", isCancelled);
       log.info("Request to cancel reports as honored");
@@ -146,7 +145,7 @@ public class CancelAsyncTaskTestCase
       log.info("Request to cancel reports as done");
 
       // Resume the work queue
-      queue.resume();
+      container.resume();
       log.info("Work queue is active again");
 
       // Get the counter again, testing that it hasn't been incremented
@@ -164,7 +163,7 @@ public class CancelAsyncTaskTestCase
        */
 
       // Set the container to pause processing
-      queue.pause();
+      container.pause();
       log.info("Work queue is paused");
 
       // Increment the counter, then get the result
@@ -172,7 +171,7 @@ public class CancelAsyncTaskTestCase
       log.info("Sent another request to increment the counter while work queue is paused");
 
       // Resume the work queue
-      queue.resume();
+      container.resume();
       log.info("Work queue is active again");
 
       // Block until the last request has gone through the work queue
