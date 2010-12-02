@@ -9,7 +9,7 @@
   <parent>
     <groupId>org.jboss.ejb3.async</groupId>
     <artifactId>jboss-ejb3-async-build</artifactId>
-    <version>1.0.0-alpha-6-SNAPSHOT</version>
+    <version>1.0.0-alpha-6</version>
     <relativePath>../build/pom.xml</relativePath>
   </parent>
 
