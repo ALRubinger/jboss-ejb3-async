@@ -28,6 +28,8 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.jboss.ejb3.async.spi.AsyncCancellableContext;
+import org.jboss.ejb3.async.spi.AsyncInvocationId;
 import org.jboss.logging.Logger;
 
 /**
@@ -42,7 +44,7 @@ import org.jboss.logging.Logger;
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
  * @version $Revision: $
  */
-public class ResultUnwrappingFuture<V> extends FutureTask<V> implements Future<V>
+public class AsynchronousClientFuture<V> extends FutureTask<V> implements Future<V>
 {
    // --------------------------------------------------------------------------------||
    // Class Members ------------------------------------------------------------------||
@@ -50,7 +52,21 @@ public class ResultUnwrappingFuture<V> extends FutureTask<V> implements Future<V
 
    private static final long serialVersionUID = 1L;
 
-   private static final Logger log = Logger.getLogger(ResultUnwrappingFuture.class);
+   private static final Logger log = Logger.getLogger(AsynchronousClientFuture.class);
+
+   // --------------------------------------------------------------------------------||
+   // Instance Members ---------------------------------------------------------------||
+   // --------------------------------------------------------------------------------||
+
+   /**
+    * ID of this invocation, used in issuing calls to {@link Future#cancel(boolean)}
+    */
+   private final AsyncInvocationId id;
+
+   /**
+    * View of the container
+    */
+   private final AsyncCancellableContext container;
 
    // --------------------------------------------------------------------------------||
    // Constructor --------------------------------------------------------------------||
@@ -60,14 +76,24 @@ public class ResultUnwrappingFuture<V> extends FutureTask<V> implements Future<V
     * Delegate constructors back up to the super implementation
     */
 
-   public ResultUnwrappingFuture(final Callable<V> callable)
+   public AsynchronousClientFuture(final Callable<V> callable, final AsyncInvocationId id,
+         final AsyncCancellableContext container)
    {
       super(callable);
+      assert id != null : "Async invocation ID must be specified";
+      this.id = id;
+      assert container != null : "Container must be supplied";
+      this.container = container;
    }
 
-   public ResultUnwrappingFuture(final Runnable runnable, final V result)
+   public AsynchronousClientFuture(final Runnable runnable, final V result, final AsyncInvocationId id,
+         final AsyncCancellableContext container)
    {
       super(runnable, result);
+      assert id != null : "Async invocation ID must be specified";
+      this.id = id;
+      assert container != null : "Container must be supplied";
+      this.container = container;
    }
 
    // --------------------------------------------------------------------------------||
@@ -113,6 +139,33 @@ public class ResultUnwrappingFuture<V> extends FutureTask<V> implements Future<V
 
       // Return
       return wrappedValue;
+   }
+
+   /**
+    * {@inheritDoc}
+    * @see java.util.concurrent.FutureTask#cancel(boolean)
+    */
+   @Override
+   public boolean cancel(final boolean mayInterruptIfRunning)
+   {
+      // First see if already done
+      if (this.isDone())
+      {
+         // Cannot cancel a completed operation
+         return false;
+      }
+
+      // If we can't cancel per normal, send along to the server to cancel
+      boolean returnValue = super.cancel(mayInterruptIfRunning);
+      if ((!returnValue) && mayInterruptIfRunning)
+      {
+         // Send a flag to the server to cancel
+         container.cancel(id);
+         returnValue = true;
+      }
+
+      // Return
+      return returnValue;
    }
 
    // --------------------------------------------------------------------------------||

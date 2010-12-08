@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 import javax.ejb.Asynchronous;
 
 import org.jboss.aop.Advisor;
-import org.jboss.ejb3.async.impl.interceptor.AsynchronousInterceptor;
+import org.jboss.ejb3.async.impl.interceptor.AsynchronousClientInterceptor;
 import org.jboss.ejb3.async.impl.interceptor.CreatePerClassAspectFactory;
 import org.jboss.ejb3.interceptors.container.ManagedObjectAdvisor;
 import org.jboss.logging.Logger;
@@ -37,7 +37,7 @@ import org.jboss.metadata.ejb.spec.AsyncMethodsMetaData;
 import org.jboss.metadata.ejb.spec.MethodParametersMetaData;
 
 /**
- * Factory to create instances of the {@link AsynchronousInterceptor}
+ * Factory to create instances of the {@link AsynchronousClientInterceptor}
  * based on a testing environment
  * 
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
@@ -86,7 +86,7 @@ public class TestAsynchronousInterceptorFactory extends CreatePerClassAspectFact
             asyncMethods.add(asyncMethod);
          }
       }
-      final Object interceptor = new AsynchronousInterceptor(asyncMethods);
+      final Object interceptor = new AsynchronousClientInterceptor(asyncMethods);
       log.info("Created: " + interceptor);
       return interceptor;
    }

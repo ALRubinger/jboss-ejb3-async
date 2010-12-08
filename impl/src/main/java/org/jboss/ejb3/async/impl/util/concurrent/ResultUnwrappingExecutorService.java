@@ -31,10 +31,13 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.jboss.ejb3.async.impl.interceptor.CurrentAsyncInvocation;
+import org.jboss.ejb3.async.spi.AsyncCancellableContext;
+
 /**
  * {@link ExecutorService} implementation which submits all
  * incoming {@link Callable}s or {@link Runnable}s as
- * {@link ResultUnwrappingFuture} such that the bean provider's
+ * {@link AsynchronousClientFuture} such that the bean provider's
  * true value may be obtained as a result.
  *
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
@@ -52,6 +55,11 @@ public class ResultUnwrappingExecutorService implements ExecutorService
     */
    private final ExecutorService delegate;
 
+   /**
+    * Async view of the container
+    */
+   private final AsyncCancellableContext container;
+
    // --------------------------------------------------------------------------------||
    // Constructor --------------------------------------------------------------------||
    // --------------------------------------------------------------------------------||
@@ -63,15 +71,22 @@ public class ResultUnwrappingExecutorService implements ExecutorService
     * @param delegate {@link ExecutorService} implementation used to carry out all tasks
     * @throws IllegalArgumentException If the delegate is not specified
     */
-   public ResultUnwrappingExecutorService(final ExecutorService delegate) throws IllegalArgumentException
+   public ResultUnwrappingExecutorService(final ExecutorService delegate, final AsyncCancellableContext container)
+         throws IllegalArgumentException
    {
       if (delegate == null)
       {
          throw new IllegalArgumentException("Delegate " + ExecutorService.class.getSimpleName() + " must be specified");
       }
+      if (container == null)
+      {
+         throw new IllegalArgumentException("Container " + AsyncCancellableContext.class.getSimpleName()
+               + " must be specified");
+      }
 
       // Set
       this.delegate = delegate;
+      this.container = container;
    }
 
    // --------------------------------------------------------------------------------||
@@ -95,7 +110,8 @@ public class ResultUnwrappingExecutorService implements ExecutorService
    {
       if (task == null)
          throw new NullPointerException();
-      final FutureTask<T> ftask = new ResultUnwrappingFuture<T>(task);
+      final FutureTask<T> ftask = new AsynchronousClientFuture<T>(task,
+            CurrentAsyncInvocation.getCurrentAsyncInvocationId(), this.container);
       delegate.execute(ftask);
       return new LocalJvmSerializableFutureWrapper<T>(ftask);
    }
@@ -109,7 +125,8 @@ public class ResultUnwrappingExecutorService implements ExecutorService
    {
       if (task == null)
          throw new NullPointerException();
-      final FutureTask<T> ftask = new ResultUnwrappingFuture<T>(task, result);
+      final FutureTask<T> ftask = new AsynchronousClientFuture<T>(task, result,
+            CurrentAsyncInvocation.getCurrentAsyncInvocationId(), this.container);
       delegate.execute(ftask);
       return new LocalJvmSerializableFutureWrapper<T>(ftask);
    }
@@ -123,7 +140,8 @@ public class ResultUnwrappingExecutorService implements ExecutorService
    {
       if (task == null)
          throw new NullPointerException();
-      final FutureTask<Object> ftask = new ResultUnwrappingFuture<Object>(task, null);
+      final FutureTask<Object> ftask = new AsynchronousClientFuture<Object>(task, null,
+            CurrentAsyncInvocation.getCurrentAsyncInvocationId(), this.container);
       delegate.execute(ftask);
       return new LocalJvmSerializableFutureWrapper<Object>(ftask);
    }

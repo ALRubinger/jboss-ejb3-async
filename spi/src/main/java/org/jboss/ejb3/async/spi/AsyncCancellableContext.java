@@ -24,34 +24,17 @@ package org.jboss.ejb3.async.spi;
 import java.util.concurrent.Future;
 
 /**
- * View of an invocation containing an underlying
- * {@link AsyncInvocationContext}
+ * EJB 3.1 Async View of a Container capable of cancelling an operation
  * 
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
  */
-public interface AsyncInvocation
+public interface AsyncCancellableContext
 {
    /**
-    * Metadata Group
+    * Cancels the invocation with the given ID
+    * @param id
+    * @throws IllegalArgumentException If the ID is not specified
+    * @see {@link Future#cancel(boolean)}
     */
-   String METADATA_GROUP_ASYNC = "org.jboss.ejb3.async";
-   
-   /**
-    * Metadata Key
-    */
-   String METADATA_KEY_ID = "UUID";
-   
-   /**
-    * Obtains the {@link AsyncInvocationContext} associated with this
-    * invocation
-    * @return
-    */
-   AsyncInvocationContext getAsyncInvocationContext();
-   
-   /**
-    * Obtains the context (ie. Container) capable of receiving
-    * {@link Future#cancel(boolean)} events
-    * @return
-    */
-   AsyncCancellableContext getCancellableContext();
+   void cancel(AsyncInvocationId id) throws IllegalArgumentException;
 }

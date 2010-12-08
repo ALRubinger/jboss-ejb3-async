@@ -19,39 +19,27 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.ejb3.async.spi;
+package org.jboss.ejb3.async.impl;
 
-import java.util.concurrent.Future;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import org.jboss.ejb3.async.spi.AsyncInvocationId;
+import org.jboss.ejb3.async.spi.AsyncInvocationMap;
 
 /**
- * View of an invocation containing an underlying
- * {@link AsyncInvocationContext}
+ * Implementation of a {@link ConcurrentMap} to track
+ * Asynchronous invocations currently in play, and whether they've
+ * been cancelled or not
  * 
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
  */
-public interface AsyncInvocation
+public class AsyncInvocationMapImpl extends ConcurrentHashMap<AsyncInvocationId, Boolean> implements AsyncInvocationMap
 {
+
    /**
-    * Metadata Group
+    * serialVersionUID
     */
-   String METADATA_GROUP_ASYNC = "org.jboss.ejb3.async";
-   
-   /**
-    * Metadata Key
-    */
-   String METADATA_KEY_ID = "UUID";
-   
-   /**
-    * Obtains the {@link AsyncInvocationContext} associated with this
-    * invocation
-    * @return
-    */
-   AsyncInvocationContext getAsyncInvocationContext();
-   
-   /**
-    * Obtains the context (ie. Container) capable of receiving
-    * {@link Future#cancel(boolean)} events
-    * @return
-    */
-   AsyncCancellableContext getCancellableContext();
+   private static final long serialVersionUID = 1L;
+
 }

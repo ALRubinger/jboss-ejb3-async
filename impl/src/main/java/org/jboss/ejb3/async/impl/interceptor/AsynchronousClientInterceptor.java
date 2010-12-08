@@ -23,20 +23,31 @@ package org.jboss.ejb3.async.impl.interceptor;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.net.URI;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import org.jboss.aop.Dispatcher;
 import org.jboss.aop.advice.Interceptor;
 import org.jboss.aop.joinpoint.Invocation;
 import org.jboss.aop.joinpoint.MethodInvocation;
+import org.jboss.aop.util.PayloadKey;
+import org.jboss.aspects.remoting.InvokeRemoteInterceptor;
+import org.jboss.aspects.remoting.PojiProxy;
+import org.jboss.ejb3.async.impl.AsyncInvocationIdUUIDImpl;
 import org.jboss.ejb3.async.impl.ClientExecutorService;
+import org.jboss.ejb3.async.impl.util.concurrent.ResultUnwrappingExecutorService;
+import org.jboss.ejb3.async.spi.AsyncCancellableContext;
 import org.jboss.ejb3.async.spi.AsyncInvocation;
 import org.jboss.ejb3.async.spi.AsyncInvocationContext;
+import org.jboss.ejb3.async.spi.AsyncInvocationId;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.ejb.spec.AsyncMethodMetaData;
 import org.jboss.metadata.ejb.spec.AsyncMethodsMetaData;
 import org.jboss.metadata.ejb.spec.MethodParametersMetaData;
+import org.jboss.remoting.InvokerLocator;
 import org.jboss.security.SecurityContext;
 
 /**
@@ -52,7 +63,7 @@ import org.jboss.security.SecurityContext;
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
  * @version $Revision: $
  */
-public class AsynchronousInterceptor implements Interceptor, Serializable
+public class AsynchronousClientInterceptor implements Interceptor, Serializable
 {
 
    // --------------------------------------------------------------------------------||
@@ -67,7 +78,7 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
    /**
     * Logger
     */
-   private static final Logger log = Logger.getLogger(AsynchronousInterceptor.class);
+   private static final Logger log = Logger.getLogger(AsynchronousClientInterceptor.class);
 
    /*
     * Metadata attachments flagging this invocation's already been dispatched
@@ -94,7 +105,7 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
    /**
     * Constructor
     */
-   public AsynchronousInterceptor(final AsyncMethodsMetaData asyncMethods)
+   public AsynchronousClientInterceptor(final AsyncMethodsMetaData asyncMethods)
    {
       assert asyncMethods != null : "Async Methods must be supplied";
       this.asyncMethods = asyncMethods;
@@ -159,14 +170,28 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
       nextInvocation.getMetaData().addMetaData(INVOCATION_METADATA_TAG, INVOCATION_METADATA_ATTR,
             INVOCATION_METADATA_VALUE);
 
-      // Make the asynchronous task from the invocation
-      final Callable<Object> asyncTask = new AsyncInvocationTask<Object>(nextInvocation, sc);
+      // Make a new ID for the invocation
+      final AsyncInvocationId id = new AsyncInvocationIdUUIDImpl();
 
-      // Short-circuit the invocation into new Thread 
-      final Future<Object> task = executorService.submit(asyncTask);
-      if (log.isTraceEnabled())
+      // Make the asynchronous task from the invocation
+      final Callable<Object> asyncTask = new AsyncInvocationTask<Object>(nextInvocation, sc, id);
+
+      // Short-circuit the invocation into new Thread
+      final Future<Object> task;
+      try
       {
-         log.trace("Submitting async invocation " + invocation + " via " + executorService);
+         // Mark the thread w/ the UUID so it can be picked up by the ES during submit, and stuffed into the Future
+         CurrentAsyncInvocation.markCurrentInvocation(id, nextInvocation);
+         task = executorService.submit(asyncTask);
+         if (log.isTraceEnabled())
+         {
+            log.trace("Submitting async invocation " + invocation + " via " + executorService);
+         }
+      }
+      finally
+      {
+         // Clear the Thread
+         CurrentAsyncInvocation.unmarkCurrentInvocationFromThread();
       }
 
       // Return
@@ -270,7 +295,7 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
    {
       // Precondition checks
       assert invocation != null : "Invocation must be specified";
-
+      
       // If this invocation has been equipped with an associated ES
       if (invocation instanceof AsyncInvocation)
       {
@@ -289,7 +314,14 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
       // Supply our own ES for the client
       else
       {
-         return ClientExecutorService.INSTANCE;
+         final InvokerLocator locator = (InvokerLocator) invocation.getMetaData(InvokeRemoteInterceptor.REMOTING,
+               InvokeRemoteInterceptor.INVOKER_LOCATOR);
+         Object oid = invocation.getMetaData().getMetaData(Dispatcher.DISPATCHER, Dispatcher.OID);
+         final PojiProxy proxy = new PojiProxy(oid, locator, new Interceptor[]{});
+         final AsyncCancellableContext container = (AsyncCancellableContext) Proxy.newProxyInstance(Thread
+               .currentThread().getContextClassLoader(), new Class<?>[]
+         {AsyncCancellableContext.class}, proxy);
+         return new ResultUnwrappingExecutorService(ClientExecutorService.INSTANCE, container);
       }
    }
 
@@ -310,10 +342,18 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
        */
       private final SecurityContext sc;
 
-      public AsyncInvocationTask(final Invocation invocation, final SecurityContext sc)
+      /**
+       * ID of the invocation
+       */
+      private final AsyncInvocationId id;
+
+      public AsyncInvocationTask(final Invocation invocation, final SecurityContext sc, final AsyncInvocationId id)
       {
+         assert invocation != null : "Invocation must be supplied";
+         assert id != null : "Async Invocation ID must be supplied";
          this.invocation = invocation;
          this.sc = sc;
+         this.id = id;
       }
 
       @SuppressWarnings("unchecked")
@@ -327,17 +367,31 @@ public class AsynchronousInterceptor implements Interceptor, Serializable
             // Set new sc
             SecurityActions.setSecurityContext(this.sc);
 
+            // Mark the current invocation both on the executing Thread and the Invocation
+            CurrentAsyncInvocation.markCurrentInvocation(this.id, this.invocation);
+
             // Invoke
             return (V) invocation.invokeNext();
          }
+         catch (Exception e)
+         {
+            throw e;
+         }
+         catch (Error e)
+         {
+            throw e;
+         }
          catch (Throwable t)
          {
-            throw new Exception(t);
+            throw new Error(t);
          }
          finally
          {
             // Replace the old security context
             SecurityActions.setSecurityContext(oldSc);
+
+            // Unmark the current invocation both on the executing Thread and the Invocation
+            CurrentAsyncInvocation.unmarkCurrentInvocation(this.invocation);
          }
       }
 

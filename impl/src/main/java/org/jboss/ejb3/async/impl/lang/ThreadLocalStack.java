@@ -19,39 +19,54 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.ejb3.async.spi;
+package org.jboss.ejb3.async.impl.lang;
 
-import java.util.concurrent.Future;
+import java.util.LinkedList;
 
 /**
- * View of an invocation containing an underlying
- * {@link AsyncInvocationContext}
- * 
- * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
+ * INTERNAL
+ *
+ * Using LinkedList for speed.
+ *
+ * @author <a href="mailto:bill@jboss.org">Bill Burke</a>
  */
-public interface AsyncInvocation
+public class ThreadLocalStack<T>
 {
-   /**
-    * Metadata Group
-    */
-   String METADATA_GROUP_ASYNC = "org.jboss.ejb3.async";
-   
-   /**
-    * Metadata Key
-    */
-   String METADATA_KEY_ID = "UUID";
-   
-   /**
-    * Obtains the {@link AsyncInvocationContext} associated with this
-    * invocation
-    * @return
-    */
-   AsyncInvocationContext getAsyncInvocationContext();
-   
-   /**
-    * Obtains the context (ie. Container) capable of receiving
-    * {@link Future#cancel(boolean)} events
-    * @return
-    */
-   AsyncCancellableContext getCancellableContext();
+   private ThreadLocal<LinkedList<T>> stack = new ThreadLocal<LinkedList<T>>();
+
+   public void push(T obj)
+   {
+      LinkedList<T> list = stack.get();
+      if (list == null)
+      {
+         list = new LinkedList<T>();
+         stack.set(list);
+      }
+      list.addLast(obj);
+   }
+
+   public T pop()
+   {
+      LinkedList<T> list = stack.get();
+      if (list == null)
+      {
+         return null;
+      }
+      T rtn = list.removeLast();
+      if (list.size() == 0)
+      {
+         stack.remove();
+      }
+      return rtn;
+   }
+
+   public T get()
+   {
+      LinkedList<T> list = stack.get();
+      if (list == null)
+      {
+         return null;
+      }
+      return list.getLast();
+   }
 }

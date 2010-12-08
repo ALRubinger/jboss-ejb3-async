@@ -19,39 +19,56 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.ejb3.async.spi;
+package org.jboss.ejb3.async.impl;
 
-import java.util.concurrent.Future;
+import java.io.Serializable;
+import java.util.UUID;
+
+import org.jboss.ejb3.async.spi.AsyncInvocationId;
 
 /**
- * View of an invocation containing an underlying
- * {@link AsyncInvocationContext}
+ * Implementation of {@link AsyncInvocationId} backed by a 
+ * {@link UUID}
  * 
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
  */
-public interface AsyncInvocation
+public class AsyncInvocationIdUUIDImpl implements AsyncInvocationId, Serializable
 {
    /**
-    * Metadata Group
+    * serialVersionUID
     */
-   String METADATA_GROUP_ASYNC = "org.jboss.ejb3.async";
-   
+   private static final long serialVersionUID = 1L;
    /**
-    * Metadata Key
+    * Backing UUID
     */
-   String METADATA_KEY_ID = "UUID";
-   
+   private final UUID uuid;
+
    /**
-    * Obtains the {@link AsyncInvocationContext} associated with this
-    * invocation
-    * @return
+    * Constructor
     */
-   AsyncInvocationContext getAsyncInvocationContext();
-   
+   public AsyncInvocationIdUUIDImpl()
+   {
+      uuid = UUID.randomUUID();
+   }
+
    /**
-    * Obtains the context (ie. Container) capable of receiving
-    * {@link Future#cancel(boolean)} events
-    * @return
+    * {@inheritDoc}
+    * @see java.lang.Object#hashCode()
     */
-   AsyncCancellableContext getCancellableContext();
+   @Override
+   public int hashCode()
+   {
+      return uuid.hashCode();
+   }
+
+   /**
+    * {@inheritDoc}
+    * @see java.lang.Object#equals(java.lang.Object)
+    */
+   @Override
+   public boolean equals(final Object obj)
+   {
+      return uuid.equals(obj);
+   }
+
 }

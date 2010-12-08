@@ -32,7 +32,11 @@ import java.util.concurrent.Future;
 
 import javax.ejb.AsyncResult;
 
+import org.jboss.ejb3.async.impl.AsyncInvocationIdUUIDImpl;
 import org.jboss.ejb3.async.impl.ClientExecutorService;
+import org.jboss.ejb3.async.impl.interceptor.CurrentAsyncInvocation;
+import org.jboss.ejb3.async.spi.AsyncCancellableContext;
+import org.jboss.ejb3.async.spi.AsyncInvocationId;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -59,14 +63,33 @@ public class SerializableFutureTestCase
       final ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
       final ObjectOutputStream out = new ObjectOutputStream(byteOut);
       final String expectedValue = "Expected Value";
-      final ExecutorService es = ClientExecutorService.INSTANCE;
-      final Future<AsyncResult<String>> serializableFuture = es.submit(new Callable<AsyncResult<String>>()
+      final ExecutorService es = new ResultUnwrappingExecutorService(ClientExecutorService.INSTANCE,
+            new AsyncCancellableContext()
+            {
+
+               @Override
+               public void cancel(final AsyncInvocationId id) throws IllegalArgumentException
+               {
+                  //NOOP for this test
+               }
+            });
+      final AsyncInvocationId id = new AsyncInvocationIdUUIDImpl();
+      CurrentAsyncInvocation.markCurrentInvocationOnThread(id);
+      final Future<AsyncResult<String>> serializableFuture;
+      try
       {
-         public AsyncResult<String> call()
+         serializableFuture = es.submit(new Callable<AsyncResult<String>>()
          {
-            return new AsyncResult<String>(expectedValue);
-         }
-      });
+            public AsyncResult<String> call()
+            {
+               return new AsyncResult<String>(expectedValue);
+            }
+         });
+      }
+      finally
+      {
+         CurrentAsyncInvocation.unmarkCurrentInvocationFromThread();
+      }
       out.writeObject(serializableFuture);
       out.flush();
       out.close();

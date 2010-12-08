@@ -21,37 +21,15 @@
  */
 package org.jboss.ejb3.async.spi;
 
-import java.util.concurrent.Future;
+import java.util.concurrent.ConcurrentMap;
 
 /**
- * View of an invocation containing an underlying
- * {@link AsyncInvocationContext}
+ * Keeps track of current @Asynchronous invocations and
+ * whether or not they've been cancelled
  * 
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
  */
-public interface AsyncInvocation
+public interface AsyncInvocationMap extends ConcurrentMap<AsyncInvocationId, Boolean>
 {
-   /**
-    * Metadata Group
-    */
-   String METADATA_GROUP_ASYNC = "org.jboss.ejb3.async";
-   
-   /**
-    * Metadata Key
-    */
-   String METADATA_KEY_ID = "UUID";
-   
-   /**
-    * Obtains the {@link AsyncInvocationContext} associated with this
-    * invocation
-    * @return
-    */
-   AsyncInvocationContext getAsyncInvocationContext();
-   
-   /**
-    * Obtains the context (ie. Container) capable of receiving
-    * {@link Future#cancel(boolean)} events
-    * @return
-    */
-   AsyncCancellableContext getCancellableContext();
+
 }

@@ -28,7 +28,8 @@ import org.jboss.aop.MethodInfo;
 import org.jboss.aop.joinpoint.Invocation;
 import org.jboss.aop.joinpoint.MethodInvocation;
 import org.jboss.aop.util.MethodHashing;
-import org.jboss.ejb3.async.impl.interceptor.AsynchronousInterceptor;
+import org.jboss.ejb3.async.impl.interceptor.AsynchronousClientInterceptor;
+import org.jboss.ejb3.async.spi.AsyncCancellableContext;
 import org.jboss.ejb3.async.spi.AsyncInvocation;
 import org.jboss.ejb3.async.spi.AsyncInvocationContext;
 import org.jboss.ejb3.context.base.BaseSessionInvocationContext;
@@ -39,7 +40,7 @@ import org.jboss.ejb3.interceptors.direct.DirectContainer;
 /**
  * {@link DirectContainer} extension which dispatches new invocations
  * as {@link AsyncContainerMethodInvocation}; this provides a 
- * {@link AsyncInvocation} as required by the {@link AsynchronousInterceptor}.
+ * {@link AsyncInvocation} as required by the {@link AsynchronousClientInterceptor}.
  *
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
  * @version $Revision: $
@@ -133,6 +134,13 @@ public class ThreadPoolAsyncContainer<T> extends DirectContainer<T>
       public AsyncInvocationContext getAsyncInvocationContext()
       {
          return new AsyncInvocationContextImpl(this);
+      }
+
+      @Override
+      public AsyncCancellableContext getCancellableContext()
+      {
+         // Not needed for this test
+         return null;
       }
 
    }

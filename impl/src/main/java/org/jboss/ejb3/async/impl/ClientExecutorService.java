@@ -31,7 +31,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.jboss.ejb3.async.impl.util.concurrent.ResultUnwrappingExecutorService;
 import org.jboss.ejb3.async.spi.AsyncInvocation;
 
 /**
@@ -52,7 +51,7 @@ public enum ClientExecutorService implements ExecutorService {
     * Singleton instance, uses a backing thread pool AS, fronted by an ES impl to unwrap 
     * the return value
     */
-   private final ExecutorService delegate = new ResultUnwrappingExecutorService(Executors.newCachedThreadPool());
+   private final ExecutorService delegate = Executors.newCachedThreadPool();
 
    // --------------------------------------------------------------------------------||
    // Delegate Methods ---------------------------------------------------------------||
