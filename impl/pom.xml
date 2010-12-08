@@ -1,15 +1,13 @@
 <!--
   vi:ts=2:sw=2:expandtab
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <!-- Define Parent -->
   <parent>
     <groupId>org.jboss.ejb3.async</groupId>
     <artifactId>jboss-ejb3-async-parent</artifactId>
-    <version>1.0.0-alpha-7-SNAPSHOT</version>
+    <version>1.0.0-alpha-7</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
