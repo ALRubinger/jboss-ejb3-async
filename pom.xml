@@ -1,52 +1,167 @@
 <?xml version="1.0" encoding="UTF-8"?>
-  <!--
-  vi:ts=2:sw=2:expandtab:
--->
+<!-- vi:ts=2:sw=2:expandtab: -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <!-- Parent -->
-  <parent>
-    <groupId>org.jboss</groupId>
-    <artifactId>jboss-parent</artifactId>
-    <version>5</version>
-  </parent>
+	<!-- Parent -->
+	<parent>
+		<groupId>org.jboss</groupId>
+		<artifactId>jboss-parent</artifactId>
+		<version>5</version>
+	</parent>
 
-  <!-- Model Information -->
-  <modelVersion>4.0.0</modelVersion>
-  
-    <!-- Artifact Information  -->
-  <groupId>org.jboss.ejb3.async</groupId>
-  <artifactId>jboss-ejb3-async-parent</artifactId>
-  <version>1.0.0-alpha-7-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <name>JBoss EJB 3.1+ @Asychronous Aggregator</name>
-  <url>http://www.jboss.org</url>
-  <description>Support of EJB @Asynchronous as detailed by EJB 3.1 Specification 4.5</description>
+	<!-- Model Information -->
+	<modelVersion>4.0.0</modelVersion>
 
-  <!-- Plugin Configuration -->
-  <build>
-    <plugins>
+	<!-- Artifact Information -->
+	<groupId>org.jboss.ejb3.async</groupId>
+	<artifactId>jboss-ejb3-async-parent</artifactId>
+	<version>1.0.0-alpha-7-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>JBoss EJB 3.1+ @Asychronous Aggregator</name>
+	<url>http://www.jboss.org</url>
+	<description>Support of EJB @Asynchronous as detailed by EJB 3.1 Specification 4.5</description>
 
-      <!-- Deploy -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <!-- Don't include this aggregator in the deployment -->
-          <skip>true</skip>
-        </configuration>
-      </plugin>
+	<!-- SCM -->
+	<scm>
+		<connection>scm:git:git://github.com/jbossejb3/jboss-ejb3-async.git</connection>
+		<developerConnection>scm:git:git@github.com:jbossejb3/jboss-ejb3-async.git</developerConnection>
+		<url>http://github.com/jbossejb3/jboss-ejb3-async</url>
+	</scm>
 
-    </plugins>
-  </build>
+	<!-- Issues -->
+	<issueManagement>
+		<system>jira</system>
+		<url>http://jira.jboss.com/jira/browse/EJBTHREE</url>
+	</issueManagement>
 
-  <!-- Aggregate Modules -->
-  <modules>
-    <module>spi</module>
-    <module>build</module>
-    <module>deployer</module>
-    <module>impl</module>
-  </modules>
+	<!-- Properties -->
+	<properties>
+
+		<!-- Versioning -->
+		<version.junit_junit>4.6</version.junit_junit>
+		<version.org.jboss.ejb3.context>0.2.0</version.org.jboss.ejb3.context>
+		<javax.ejb.groupId>org.jboss.javaee</javax.ejb.groupId>
+		<javax.ejb.artifactId>jboss-ejb-api</javax.ejb.artifactId>
+		<javax.ejb.version>3.0.0.GA</javax.ejb.version>
+
+	</properties>
+
+	<!-- Plugin Configuration -->
+	<build>
+		<plugins>
+
+			<!-- Deploy -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<!-- Don't include this aggregator in the deployment -->
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+
+			<!-- Compiler / JDK6 required for EJB 3.1 -->
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<inherited>true</inherited>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<showDeprecation>false</showDeprecation>
+					<showWarnings>true</showWarnings>
+					<optimize>true</optimize>
+					<compilerVersion>1.6</compilerVersion>
+					<fork>true</fork>
+					<argLine>-Xmx512M</argLine>
+					<executable>${JAVA_HOME}/bin/javac</executable>
+				</configuration>
+			</plugin>
+
+			<!-- Surefire -->
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+					<trimStackTrace>false</trimStackTrace>
+					<printSummary>true</printSummary>
+					<includes>
+						<include>**/*TestCase.java</include>
+						<include>**/*TestSuite.java</include>
+					</includes>
+					<forkMode>always</forkMode>
+					<!-- <reportFormat>xml</reportFormat> -->
+				</configuration>
+			</plugin>
+
+			<!-- Enforce Maven Environment -->
+			<plugin>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-maven-environment</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<rules>
+						<requireJavaVersion>
+							<version>1.6.0</version> <!-- Must be JDK6 -->
+						</requireJavaVersion>
+						<requireProperty>
+							<property>env.JAVA_HOME</property>
+							<message>"JAVA_HOME needs to be set to compile"</message>
+						</requireProperty>
+					</rules>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.0</version>
+				<configuration>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<!-- Aggregate Modules -->
+	<modules>
+		<module>spi</module>
+		<module>deployer</module>
+		<module>impl</module>
+	</modules>
+
+	<!-- Dependency Management -->
+	<dependencyManagement>
+		<dependencies>
+
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${version.junit_junit}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- org.jboss.ejb3.context -->
+			<dependency>
+				<groupId>org.jboss.ejb3.context</groupId>
+				<artifactId>jboss-ejb3-context-spi</artifactId>
+				<version>${version.org.jboss.ejb3.context}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>${javax.ejb.groupId}</groupId>
+				<artifactId>${javax.ejb.artifactId}</artifactId>
+				<version>${javax.ejb.version}</version>
+				<scope>provided</scope>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
 
 </project>
