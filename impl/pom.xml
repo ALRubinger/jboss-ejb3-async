@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.jboss.ejb3.async</groupId>
     <artifactId>jboss-ejb3-async-parent</artifactId>
-    <version>1.0.0-alpha-8-SNAPSHOT</version>
+    <version>1.0.0-alpha-8</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
