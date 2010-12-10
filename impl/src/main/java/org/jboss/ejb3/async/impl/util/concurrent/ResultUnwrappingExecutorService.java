@@ -31,8 +31,9 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.jboss.ejb3.async.impl.interceptor.CurrentAsyncInvocation;
-import org.jboss.ejb3.async.spi.AsyncCancellableContext;
+import org.jboss.ejb3.async.spi.AsyncEndpoint;
+import org.jboss.ejb3.async.spi.AsynchronousClientFuture;
+import org.jboss.ejb3.async.spi.CurrentAsyncInvocation;
 
 /**
  * {@link ExecutorService} implementation which submits all
@@ -58,7 +59,7 @@ public class ResultUnwrappingExecutorService implements ExecutorService
    /**
     * Async view of the container
     */
-   private final AsyncCancellableContext container;
+   private final AsyncEndpoint container;
 
    // --------------------------------------------------------------------------------||
    // Constructor --------------------------------------------------------------------||
@@ -71,7 +72,7 @@ public class ResultUnwrappingExecutorService implements ExecutorService
     * @param delegate {@link ExecutorService} implementation used to carry out all tasks
     * @throws IllegalArgumentException If the delegate is not specified
     */
-   public ResultUnwrappingExecutorService(final ExecutorService delegate, final AsyncCancellableContext container)
+   public ResultUnwrappingExecutorService(final ExecutorService delegate, final AsyncEndpoint container)
          throws IllegalArgumentException
    {
       if (delegate == null)
@@ -80,8 +81,7 @@ public class ResultUnwrappingExecutorService implements ExecutorService
       }
       if (container == null)
       {
-         throw new IllegalArgumentException("Container " + AsyncCancellableContext.class.getSimpleName()
-               + " must be specified");
+         throw new IllegalArgumentException("Container " + AsyncEndpoint.class.getSimpleName() + " must be specified");
       }
 
       // Set

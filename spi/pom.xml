@@ -29,6 +29,8 @@
   <properties>
   
     <!-- Versioning -->
+    <version.org.jboss.metadata.ejb>2.0.0-alpha-24</version.org.jboss.metadata.ejb>
+    <version.org.jboss.security>2.0.2.SP6</version.org.jboss.security>
   
   </properties>
 
@@ -49,6 +51,16 @@
     <dependency>
        <groupId>${javax.ejb.groupId}</groupId>
        <artifactId>${javax.ejb.artifactId}</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.metadata</groupId>
+      <artifactId>jboss-metadata-ejb</artifactId>
+      <version>${version.org.jboss.metadata.ejb}</version>
+    </dependency>
+    <dependency>
+       <groupId>org.jboss.security</groupId>
+       <artifactId>jboss-security-spi</artifactId>
+       <version>${version.org.jboss.security}</version>
     </dependency>
     
   </dependencies>

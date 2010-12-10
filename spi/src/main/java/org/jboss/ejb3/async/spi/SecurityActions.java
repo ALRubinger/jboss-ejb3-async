@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2010, Red Hat Middleware LLC, and individual contributors
+ * Copyright 2009, Red Hat Middleware LLC, and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
   *
@@ -21,37 +21,42 @@
  */
 package org.jboss.ejb3.async.spi;
 
-import java.util.concurrent.Future;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
+import org.jboss.security.SecurityContext;
+import org.jboss.security.SecurityContextAssociation;
 
 /**
- * View of an invocation containing an underlying
- * {@link AsyncInvocationContext}
+ * SecurityActions
  * 
+ * Self-contained privileged actions
+ *
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
+ * @version $Revision: $
  */
-public interface AsyncInvocation
+class SecurityActions
 {
-   /**
-    * Metadata Group
-    */
-   String METADATA_GROUP_ASYNC = "org.jboss.ejb3.async";
-   
-   /**
-    * Metadata Key
-    */
-   String METADATA_KEY_ID = "UUID";
-   
-   /**
-    * Obtains the {@link AsyncInvocationContext} associated with this
-    * invocation
-    * @return
-    */
-   AsyncInvocationContext getAsyncInvocationContext();
-   
-   /**
-    * Obtains the context (ie. Container) capable of receiving
-    * {@link Future#cancel(boolean)} events
-    * @return
-    */
-   AsyncEndpoint getContainer();
+   static SecurityContext getSecurityContext()
+   {
+      return AccessController.doPrivileged(new PrivilegedAction<SecurityContext>()
+      {
+         public SecurityContext run()
+         {
+            return SecurityContextAssociation.getSecurityContext();
+         }
+      });
+   }
+
+   static void setSecurityContext(final SecurityContext sc)
+   {
+      AccessController.doPrivileged(new PrivilegedAction<Void>()
+      {
+         public Void run()
+         {
+            SecurityContextAssociation.setSecurityContext(sc);
+            return null;
+         }
+      });
+   }
 }

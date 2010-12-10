@@ -32,7 +32,7 @@ public abstract class CreatePerClassAspectFactory implements AspectFactory
     * @see org.jboss.aop.advice.AspectFactory#createPerVM()
     */
    @Override
-   public Object createPerVM()
+   public final Object createPerVM()
    {
       throw RTE;
    }
@@ -42,7 +42,7 @@ public abstract class CreatePerClassAspectFactory implements AspectFactory
     * @see org.jboss.aop.advice.AspectFactory#createPerInstance(org.jboss.aop.Advisor, org.jboss.aop.InstanceAdvisor)
     */
    @Override
-   public Object createPerInstance(final Advisor advisor, final InstanceAdvisor instanceAdvisor)
+   public final Object createPerInstance(final Advisor advisor, final InstanceAdvisor instanceAdvisor)
    {
       throw RTE;
    }
@@ -52,7 +52,7 @@ public abstract class CreatePerClassAspectFactory implements AspectFactory
     * @see org.jboss.aop.advice.AspectFactory#createPerJoinpoint(org.jboss.aop.Advisor, org.jboss.aop.joinpoint.Joinpoint)
     */
    @Override
-   public Object createPerJoinpoint(final Advisor advisor, final Joinpoint jp)
+   public final Object createPerJoinpoint(final Advisor advisor, final Joinpoint jp)
    {
       throw RTE;
    }
@@ -62,7 +62,8 @@ public abstract class CreatePerClassAspectFactory implements AspectFactory
     * @see org.jboss.aop.advice.AspectFactory#createPerJoinpoint(org.jboss.aop.Advisor, org.jboss.aop.InstanceAdvisor, org.jboss.aop.joinpoint.Joinpoint)
     */
    @Override
-   public Object createPerJoinpoint(final Advisor advisor, final InstanceAdvisor instanceAdvisor, final Joinpoint jp)
+   public final Object createPerJoinpoint(final Advisor advisor, final InstanceAdvisor instanceAdvisor,
+         final Joinpoint jp)
    {
       throw RTE;
    }
@@ -72,7 +73,7 @@ public abstract class CreatePerClassAspectFactory implements AspectFactory
     * @see org.jboss.aop.advice.AspectFactory#getName()
     */
    @Override
-   public String getName()
+   public final String getName()
    {
       return this.getClass().getName();
    }

@@ -22,15 +22,15 @@
 package org.jboss.ejb3.async.impl.interceptor;
 
 import org.jboss.aop.joinpoint.Invocation;
-import org.jboss.ejb3.async.impl.lang.ThreadLocalStack;
 import org.jboss.ejb3.async.spi.AsyncInvocation;
 import org.jboss.ejb3.async.spi.AsyncInvocationId;
+import org.jboss.ejb3.async.spi.CurrentAsyncInvocation;
 import org.jboss.logging.Logger;
 
 /**
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
  */
-public class CurrentAsyncInvocation
+public class CurrentAsyncAOPInvocation
 {
 
    // --------------------------------------------------------------------------------||
@@ -40,12 +40,7 @@ public class CurrentAsyncInvocation
    /**
     * Logger
     */
-   private static final Logger log = Logger.getLogger(CurrentAsyncInvocation.class);
-
-   /**
-    * Current invocations in play
-    */
-   private static final ThreadLocalStack<AsyncInvocationId> CURRENT_EXECUTING_INVOCATIONS = new ThreadLocalStack<AsyncInvocationId>();
+   private static final Logger log = Logger.getLogger(CurrentAsyncAOPInvocation.class);
 
    // --------------------------------------------------------------------------------||
    // Constructor --------------------------------------------------------------------||
@@ -54,7 +49,7 @@ public class CurrentAsyncInvocation
    /**
     * Internal ctor, prohibited use
     */
-   private CurrentAsyncInvocation()
+   private CurrentAsyncAOPInvocation()
    {
       throw new UnsupportedOperationException("No instances");
    }
@@ -74,7 +69,7 @@ public class CurrentAsyncInvocation
       assert invocation != null : "Invocation must be specified";
 
       // Attempt to get from the Thread (local)
-      AsyncInvocationId current = getCurrentAsyncInvocationId();
+      AsyncInvocationId current = CurrentAsyncInvocation.getCurrentAsyncInvocationId();
 
       // Attempt to get from the invocation
       if (current == null)
@@ -87,48 +82,19 @@ public class CurrentAsyncInvocation
       return current;
    }
 
-   /**
-    * Obtains the current {@link AsyncInvocationId} from the thread (local)
-    * @return
-    */
-   public static AsyncInvocationId getCurrentAsyncInvocationId()
-   {
-      // Attempt to get from the Thread (local)
-      return CURRENT_EXECUTING_INVOCATIONS.get();
-   }
-
-   public static void markCurrentInvocationOnThread(final AsyncInvocationId uuid)
-   {
-      if (log.isTraceEnabled())
-      {
-         log.trace("Putting current invocation on Thread " + Thread.currentThread() + ":  " + uuid);
-      }
-      CURRENT_EXECUTING_INVOCATIONS.push(uuid);
-   }
-
    public static void markCurrentInvocation(final AsyncInvocationId uuid, final Invocation invocation)
    {
       // Precondition checks
       assert invocation != null : "Invocation must be specified";
 
-      markCurrentInvocationOnThread(uuid);
+      CurrentAsyncInvocation.markCurrentInvocationOnThread(uuid);
       invocation.getMetaData().addMetaData(AsyncInvocation.METADATA_GROUP_ASYNC, AsyncInvocation.METADATA_KEY_ID, uuid);
-   }
-
-   public static AsyncInvocationId unmarkCurrentInvocationFromThread()
-   {
-      final AsyncInvocationId id = CURRENT_EXECUTING_INVOCATIONS.pop();
-      if (log.isTraceEnabled())
-      {
-         log.trace("Removing current invocation from Thread " + Thread.currentThread() + ":  " + id);
-      }
-      return id;
    }
 
    public static AsyncInvocationId unmarkCurrentInvocation(final Invocation invocation)
    {
       // Pop off
-      final AsyncInvocationId current = unmarkCurrentInvocationFromThread();
+      final AsyncInvocationId current = CurrentAsyncInvocation.unmarkCurrentInvocationFromThread();
 
       // Remove metadata from the invocation
       invocation.getMetaData().removeMetaData(AsyncInvocation.METADATA_GROUP_ASYNC, AsyncInvocation.METADATA_KEY_ID);

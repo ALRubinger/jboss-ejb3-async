@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.ejb3.async.impl.util.concurrent;
+package org.jboss.ejb3.async.spi;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -28,8 +28,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.jboss.ejb3.async.spi.AsyncCancellableContext;
-import org.jboss.ejb3.async.spi.AsyncInvocationId;
 import org.jboss.logging.Logger;
 
 /**
@@ -66,7 +64,7 @@ public class AsynchronousClientFuture<V> extends FutureTask<V> implements Future
    /**
     * View of the container
     */
-   private final AsyncCancellableContext container;
+   private final AsyncEndpoint container;
 
    // --------------------------------------------------------------------------------||
    // Constructor --------------------------------------------------------------------||
@@ -76,8 +74,7 @@ public class AsynchronousClientFuture<V> extends FutureTask<V> implements Future
     * Delegate constructors back up to the super implementation
     */
 
-   public AsynchronousClientFuture(final Callable<V> callable, final AsyncInvocationId id,
-         final AsyncCancellableContext container)
+   public AsynchronousClientFuture(final Callable<V> callable, final AsyncInvocationId id, final AsyncEndpoint container)
    {
       super(callable);
       assert id != null : "Async invocation ID must be specified";
@@ -87,7 +84,7 @@ public class AsynchronousClientFuture<V> extends FutureTask<V> implements Future
    }
 
    public AsynchronousClientFuture(final Runnable runnable, final V result, final AsyncInvocationId id,
-         final AsyncCancellableContext container)
+         final AsyncEndpoint container)
    {
       super(runnable, result);
       assert id != null : "Async invocation ID must be specified";
@@ -156,7 +153,8 @@ public class AsynchronousClientFuture<V> extends FutureTask<V> implements Future
       }
 
       // If we can't cancel per normal, send along to the server to cancel
-      boolean returnValue = super.cancel(mayInterruptIfRunning);
+      //      boolean returnValue = super.cancel(mayInterruptIfRunning);
+      boolean returnValue = super.cancel(false); // Needs to go to this
       if ((!returnValue) && mayInterruptIfRunning)
       {
          // Send a flag to the server to cancel

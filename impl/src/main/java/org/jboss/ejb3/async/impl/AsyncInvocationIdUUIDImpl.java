@@ -71,4 +71,14 @@ public class AsyncInvocationIdUUIDImpl implements AsyncInvocationId, Serializabl
       return uuid.equals(obj);
    }
 
+   /**
+    * {@inheritDoc}
+    * @see java.lang.Object#toString()
+    */
+   @Override
+   public String toString()
+   {
+      return "AsyncInvocationIdUUIDImpl [uuid=" + uuid + "]";
+   }
+
 }

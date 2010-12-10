@@ -1,9 +1,9 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2010, Red Hat Middleware LLC, and individual contributors
+ * Copyright 2009, Red Hat Middleware LLC, and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
-  *
+ *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation; either version 2.1 of
@@ -21,37 +21,27 @@
  */
 package org.jboss.ejb3.async.spi;
 
-import java.util.concurrent.Future;
+import java.io.Serializable;
+import java.lang.reflect.Method;
 
 /**
- * View of an invocation containing an underlying
- * {@link AsyncInvocationContext}
+ * Represents the @Asycnhronous view of the Container
  * 
  * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
  */
-public interface AsyncInvocation
+public interface AsyncEndpoint extends AsyncCancellableContext
 {
+
    /**
-    * Metadata Group
-    */
-   String METADATA_GROUP_ASYNC = "org.jboss.ejb3.async";
-   
-   /**
-    * Metadata Key
-    */
-   String METADATA_KEY_ID = "UUID";
-   
-   /**
-    * Obtains the {@link AsyncInvocationContext} associated with this
-    * invocation
+    * Invokes the specified method upon the container with the specified arguments, under the specified
+    * session
+    * @param session
+    * @param invokedBusinessInterface
+    * @param method
+    * @param args
     * @return
+    * @throws Throwable
     */
-   AsyncInvocationContext getAsyncInvocationContext();
-   
-   /**
-    * Obtains the context (ie. Container) capable of receiving
-    * {@link Future#cancel(boolean)} events
-    * @return
-    */
-   AsyncEndpoint getContainer();
+   Object invokeAsync(Serializable session, Class<?> invokedBusinessInterface, Method method, Object args[])
+         throws Throwable;
 }

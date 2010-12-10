@@ -34,7 +34,6 @@
     <version.org.jboss.ejb3_jboss.ejb3.interceptors>1.0.0</version.org.jboss.ejb3_jboss.ejb3.interceptors>
     <version.org.jboss.security_jboss.security>2.0.2.SP6</version.org.jboss.security_jboss.security>
     <version.org.jboss.javaee_jboss.jacc.api>1.1.0.GA</version.org.jboss.javaee_jboss.jacc.api>
-    <version.org.jboss.metadata.ejb>2.0.0-alpha-24</version.org.jboss.metadata.ejb>
     <version.org.jboss.aspects_jboss.remoting.aspects>1.0.2</version.org.jboss.aspects_jboss.remoting.aspects>
   
   </properties>
@@ -65,13 +64,6 @@
       <groupId>org.jboss.ejb3</groupId>
       <artifactId>jboss-ejb3-interceptors</artifactId>
       <version>${version.org.jboss.ejb3_jboss.ejb3.interceptors}</version>
-      <scope>provided</scope>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.jboss.metadata</groupId>
-      <artifactId>jboss-metadata-ejb</artifactId>
-      <version>${version.org.jboss.metadata.ejb}</version>
       <scope>provided</scope>
     </dependency>
     

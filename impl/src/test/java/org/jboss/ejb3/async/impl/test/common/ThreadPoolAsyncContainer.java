@@ -29,7 +29,7 @@ import org.jboss.aop.joinpoint.Invocation;
 import org.jboss.aop.joinpoint.MethodInvocation;
 import org.jboss.aop.util.MethodHashing;
 import org.jboss.ejb3.async.impl.interceptor.AsynchronousClientInterceptor;
-import org.jboss.ejb3.async.spi.AsyncCancellableContext;
+import org.jboss.ejb3.async.spi.AsyncEndpoint;
 import org.jboss.ejb3.async.spi.AsyncInvocation;
 import org.jboss.ejb3.async.spi.AsyncInvocationContext;
 import org.jboss.ejb3.context.base.BaseSessionInvocationContext;
@@ -137,7 +137,7 @@ public class ThreadPoolAsyncContainer<T> extends DirectContainer<T>
       }
 
       @Override
-      public AsyncCancellableContext getCancellableContext()
+      public AsyncEndpoint getContainer()
       {
          // Not needed for this test
          return null;

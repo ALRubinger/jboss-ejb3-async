@@ -24,7 +24,6 @@ package org.jboss.ejb3.async.impl.interceptor;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.net.URI;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -33,20 +32,20 @@ import org.jboss.aop.Dispatcher;
 import org.jboss.aop.advice.Interceptor;
 import org.jboss.aop.joinpoint.Invocation;
 import org.jboss.aop.joinpoint.MethodInvocation;
-import org.jboss.aop.util.PayloadKey;
 import org.jboss.aspects.remoting.InvokeRemoteInterceptor;
 import org.jboss.aspects.remoting.PojiProxy;
 import org.jboss.ejb3.async.impl.AsyncInvocationIdUUIDImpl;
 import org.jboss.ejb3.async.impl.ClientExecutorService;
 import org.jboss.ejb3.async.impl.util.concurrent.ResultUnwrappingExecutorService;
-import org.jboss.ejb3.async.spi.AsyncCancellableContext;
+import org.jboss.ejb3.async.spi.AsyncEndpoint;
 import org.jboss.ejb3.async.spi.AsyncInvocation;
 import org.jboss.ejb3.async.spi.AsyncInvocationContext;
 import org.jboss.ejb3.async.spi.AsyncInvocationId;
+import org.jboss.ejb3.async.spi.AsyncInvocationTaskBase;
+import org.jboss.ejb3.async.spi.AsyncUtil;
+import org.jboss.ejb3.async.spi.CurrentAsyncInvocation;
 import org.jboss.logging.Logger;
-import org.jboss.metadata.ejb.spec.AsyncMethodMetaData;
 import org.jboss.metadata.ejb.spec.AsyncMethodsMetaData;
-import org.jboss.metadata.ejb.spec.MethodParametersMetaData;
 import org.jboss.remoting.InvokerLocator;
 import org.jboss.security.SecurityContext;
 
@@ -174,14 +173,14 @@ public class AsynchronousClientInterceptor implements Interceptor, Serializable
       final AsyncInvocationId id = new AsyncInvocationIdUUIDImpl();
 
       // Make the asynchronous task from the invocation
-      final Callable<Object> asyncTask = new AsyncInvocationTask<Object>(nextInvocation, sc, id);
+      final Callable<Object> asyncTask = new AsyncAOPInvocationTask<Object>(nextInvocation, sc, id);
 
       // Short-circuit the invocation into new Thread
       final Future<Object> task;
       try
       {
          // Mark the thread w/ the UUID so it can be picked up by the ES during submit, and stuffed into the Future
-         CurrentAsyncInvocation.markCurrentInvocation(id, nextInvocation);
+         CurrentAsyncAOPInvocation.markCurrentInvocation(id, nextInvocation);
          task = executorService.submit(asyncTask);
          if (log.isTraceEnabled())
          {
@@ -215,7 +214,7 @@ public class AsynchronousClientInterceptor implements Interceptor, Serializable
             + MethodInvocation.class.getSimpleName() + ", but has been passed: " + invocation;
       final MethodInvocation si = (MethodInvocation) invocation;
 
-      //       See if we've already been here, if so, don't handle as async
+      // See if we've already been here, if so, don't handle as async
       final String beenHere = (String) invocation.getMetaData().getMetaData(INVOCATION_METADATA_TAG,
             INVOCATION_METADATA_ATTR);
       if (beenHere != null && beenHere.equals(INVOCATION_METADATA_VALUE))
@@ -231,55 +230,8 @@ public class AsynchronousClientInterceptor implements Interceptor, Serializable
       // Get the actual method
       final Method actualMethod = si.getActualMethod();
 
-      // Loop through the declared async methods for this EJB
-      for (final AsyncMethodMetaData asyncMethod : asyncMethods)
-      {
-         // Name matches?
-         final String invokedMethodName = actualMethod.getName();
-         if (invokedMethodName.equals(asyncMethod.getMethodName()))
-         {
-            if (log.isTraceEnabled())
-            {
-               log.trace("Async method names match: " + invokedMethodName);
-            }
-
-            // Params match?
-            final MethodParametersMetaData asyncParams = asyncMethod.getMethodParams();
-            final Class<?>[] invokedParams = actualMethod.getParameterTypes();
-            final int invokedParamsSize = invokedParams.length;
-            if (asyncParams.size() != invokedParams.length)
-            {
-               if (log.isTraceEnabled())
-               {
-                  log.trace("Different async params size, no match");
-               }
-               return false;
-            }
-            for (int i = 0; i < invokedParamsSize; i++)
-            {
-               final String invokedParamTypeName = invokedParams[i].getName();
-               final String declaredName = asyncParams.get(i);
-               if (!invokedParamTypeName.equals(declaredName))
-               {
-                  return false;
-               }
-            }
-
-            // Name and params all match
-            if (log.isTraceEnabled())
-            {
-               log.trace("Dispatching as @Asynchronous: " + actualMethod);
-            }
-            return true;
-         }
-      }
-
-      // Not async
-      if (log.isTraceEnabled())
-      {
-         log.trace("Not @Asynchronous: " + invocation);
-      }
-      return false;
+      // Return if the method is async
+      return AsyncUtil.methodIsAsynchronous(actualMethod, asyncMethods);
    }
 
    /**
@@ -295,7 +247,7 @@ public class AsynchronousClientInterceptor implements Interceptor, Serializable
    {
       // Precondition checks
       assert invocation != null : "Invocation must be specified";
-      
+
       // If this invocation has been equipped with an associated ES
       if (invocation instanceof AsyncInvocation)
       {
@@ -317,12 +269,36 @@ public class AsynchronousClientInterceptor implements Interceptor, Serializable
          final InvokerLocator locator = (InvokerLocator) invocation.getMetaData(InvokeRemoteInterceptor.REMOTING,
                InvokeRemoteInterceptor.INVOKER_LOCATOR);
          Object oid = invocation.getMetaData().getMetaData(Dispatcher.DISPATCHER, Dispatcher.OID);
-         final PojiProxy proxy = new PojiProxy(oid, locator, new Interceptor[]{});
-         final AsyncCancellableContext container = (AsyncCancellableContext) Proxy.newProxyInstance(Thread
-               .currentThread().getContextClassLoader(), new Class<?>[]
-         {AsyncCancellableContext.class}, proxy);
+         log.info("OID: " + oid);
+         final PojiProxy proxy = new PojiProxyHack(oid, locator, new Interceptor[]
+         {});
+         final AsyncEndpoint container = (AsyncEndpoint) Proxy.newProxyInstance(Thread.currentThread()
+               .getContextClassLoader(), new Class<?>[]
+         {AsyncEndpoint.class}, proxy);
          return new ResultUnwrappingExecutorService(ClientExecutorService.INSTANCE, container);
       }
+   }
+
+   private static final class PojiProxyHack extends PojiProxy
+   {
+      /**
+       * serialVersionUID
+       */
+      private static final long serialVersionUID = 1L;
+
+      public PojiProxyHack(Object oid, InvokerLocator uri, Interceptor[] interceptors)
+      {
+         super(oid, uri, interceptors);
+      }
+
+      @Override
+      public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+      {
+         final Object obj = super.invoke(proxy, method, args);
+         log.info("Invoked view from proxy: " + method);
+         return obj;
+      }
+
    }
 
    // --------------------------------------------------------------------------------||
@@ -333,66 +309,36 @@ public class AsynchronousClientInterceptor implements Interceptor, Serializable
     * Task to invoke the held invocation in a new Thread, either 
     * returning the result or throwing the generated Exception
     */
-   private class AsyncInvocationTask<V> implements Callable<V>
+   private class AsyncAOPInvocationTask<V> extends AsyncInvocationTaskBase<V>
    {
       private final Invocation invocation;
 
-      /**
-       * SecurityContext to use for the invocation
-       */
-      private final SecurityContext sc;
-
-      /**
-       * ID of the invocation
-       */
-      private final AsyncInvocationId id;
-
-      public AsyncInvocationTask(final Invocation invocation, final SecurityContext sc, final AsyncInvocationId id)
+      public AsyncAOPInvocationTask(final Invocation invocation, final SecurityContext sc, final AsyncInvocationId id)
       {
+         super(sc, id);
          assert invocation != null : "Invocation must be supplied";
-         assert id != null : "Async Invocation ID must be supplied";
          this.invocation = invocation;
-         this.sc = sc;
-         this.id = id;
       }
 
-      @SuppressWarnings("unchecked")
-      public V call() throws Exception
+      @Override
+      protected void before() throws Exception
       {
-         // Get existing security context
-         final SecurityContext oldSc = SecurityActions.getSecurityContext();
+         // Mark the current invocation both on the executing Thread and the Invocation
+         CurrentAsyncAOPInvocation.markCurrentInvocation(this.id, this.invocation);
+      }
 
-         try
-         {
-            // Set new sc
-            SecurityActions.setSecurityContext(this.sc);
+      @Override
+      @SuppressWarnings("unchecked")
+      protected V proceed() throws Throwable
+      {
+         return (V) invocation.invokeNext();
+      }
 
-            // Mark the current invocation both on the executing Thread and the Invocation
-            CurrentAsyncInvocation.markCurrentInvocation(this.id, this.invocation);
-
-            // Invoke
-            return (V) invocation.invokeNext();
-         }
-         catch (Exception e)
-         {
-            throw e;
-         }
-         catch (Error e)
-         {
-            throw e;
-         }
-         catch (Throwable t)
-         {
-            throw new Error(t);
-         }
-         finally
-         {
-            // Replace the old security context
-            SecurityActions.setSecurityContext(oldSc);
-
-            // Unmark the current invocation both on the executing Thread and the Invocation
-            CurrentAsyncInvocation.unmarkCurrentInvocation(this.invocation);
-         }
+      @Override
+      protected void after() throws Exception
+      {
+         // Unmark the current invocation both on the executing Thread and the Invocation
+         CurrentAsyncAOPInvocation.unmarkCurrentInvocation(this.invocation);
       }
 
    }
