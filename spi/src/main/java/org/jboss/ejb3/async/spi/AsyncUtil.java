@@ -82,7 +82,11 @@ public class AsyncUtil
             }
 
             // Params match?
-            final MethodParametersMetaData asyncParams = asyncMethod.getMethodParams();
+            MethodParametersMetaData asyncParams = asyncMethod.getMethodParams();
+            if (asyncParams == null)
+            {
+               asyncParams = new MethodParametersMetaData();
+            }
             final Class<?>[] invokedParams = invokedMethod.getParameterTypes();
             final int invokedParamsSize = invokedParams.length;
             if (asyncParams.size() != invokedParams.length)
