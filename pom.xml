@@ -14,7 +14,7 @@
   <!-- Artifact Information -->
   <groupId>org.jboss.ejb3.async</groupId>
   <artifactId>jboss-ejb3-async-parent</artifactId>
-  <version>1.0.0-alpha-9-SNAPSHOT</version>
+  <version>1.0.0-alpha-9</version>
   <packaging>pom</packaging>
   <name>JBoss EJB 3.1+ @Asychronous Aggregator</name>
   <url>http://www.jboss.org</url>
