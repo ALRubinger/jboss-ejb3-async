@@ -59,4 +59,35 @@ class SecurityActions
          }
       });
    }
+
+   private static enum GetTcclAction implements PrivilegedAction<ClassLoader> {
+      INSTANCE;
+
+      @Override
+      public ClassLoader run()
+      {
+         return Thread.currentThread().getContextClassLoader();
+      };
+
+   }
+
+   static ClassLoader getTccl()
+   {
+      return AccessController.doPrivileged(GetTcclAction.INSTANCE);
+   }
+
+   static void setTccl(final ClassLoader cl)
+   {
+      assert cl != null : "CL must be supplied";
+      AccessController.doPrivileged(new PrivilegedAction<Void>()
+      {
+         @Override
+         public Void run()
+         {
+            Thread.currentThread().setContextClassLoader(cl);
+            return null;
+         }
+
+      });
+   }
 }

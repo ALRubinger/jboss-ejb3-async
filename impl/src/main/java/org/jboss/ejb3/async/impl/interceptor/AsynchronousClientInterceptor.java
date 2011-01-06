@@ -268,8 +268,7 @@ public class AsynchronousClientInterceptor implements Interceptor, Serializable
       {
          final InvokerLocator locator = (InvokerLocator) invocation.getMetaData(InvokeRemoteInterceptor.REMOTING,
                InvokeRemoteInterceptor.INVOKER_LOCATOR);
-         Object oid = invocation.getMetaData().getMetaData(Dispatcher.DISPATCHER, Dispatcher.OID);
-         log.info("OID: " + oid);
+         final Object oid = invocation.getMetaData().getMetaData(Dispatcher.DISPATCHER, Dispatcher.OID);
          final PojiProxy proxy = new PojiProxyHack(oid, locator, new Interceptor[]
          {});
          final AsyncEndpoint container = (AsyncEndpoint) Proxy.newProxyInstance(Thread.currentThread()
@@ -315,7 +314,7 @@ public class AsynchronousClientInterceptor implements Interceptor, Serializable
 
       public AsyncAOPInvocationTask(final Invocation invocation, final SecurityContext sc, final AsyncInvocationId id)
       {
-         super(sc, id);
+         super(sc, id, SecurityActions.getTccl());
          assert invocation != null : "Invocation must be supplied";
          this.invocation = invocation;
       }

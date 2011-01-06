@@ -41,15 +41,22 @@ public abstract class AsyncInvocationTaskBase<V> implements Callable<V>
    protected final SecurityContext sc;
 
    /**
+    * ClassLoader used to invoke
+    */
+   private final ClassLoader invokingCl;
+
+   /**
     * ID of the invocation
     */
    protected final AsyncInvocationId id;
 
-   public AsyncInvocationTaskBase(final SecurityContext sc, final AsyncInvocationId id)
+   public AsyncInvocationTaskBase(final SecurityContext sc, final AsyncInvocationId id, final ClassLoader invokingCl)
    {
       assert id != null : "Async Invocation ID must be supplied";
+      assert invokingCl != null : "CL must be supplied";
       this.sc = sc;
       this.id = id;
+      this.invokingCl = invokingCl;
    }
 
    /**
@@ -77,14 +84,18 @@ public abstract class AsyncInvocationTaskBase<V> implements Callable<V>
    {
       // Get existing security context
       final SecurityContext oldSc = SecurityActions.getSecurityContext();
+      final ClassLoader oldCl = SecurityActions.getTccl();
 
       try
       {
-         // Set new sc
-         SecurityActions.setSecurityContext(this.sc);
-
          // Before Callback
          this.before();
+
+         // Set TCCL
+         SecurityActions.setTccl(invokingCl);
+
+         // Set new sc
+         SecurityActions.setSecurityContext(this.sc);
 
          // Invoke
          return this.proceed();
@@ -105,6 +116,9 @@ public abstract class AsyncInvocationTaskBase<V> implements Callable<V>
       {
          // Replace the old security context
          SecurityActions.setSecurityContext(oldSc);
+
+         // Replace TCCL
+         SecurityActions.setTccl(oldCl);
 
          // After callback
          this.after();
